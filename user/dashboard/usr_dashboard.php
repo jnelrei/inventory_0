@@ -35,6 +35,13 @@ try {
     $products = [];
 }
 
+// Pagination
+$itemsPerPage = 20;
+$totalProducts = count($products);
+$totalPages = ceil($totalProducts / $itemsPerPage);
+$currentPage = isset($_GET['page']) ? max(1, min((int)$_GET['page'], $totalPages)) : 1;
+$startIndex = ($currentPage - 1) * $itemsPerPage;
+$paginatedProducts = array_slice($products, $startIndex, $itemsPerPage);
 
 // Get user info
 $userName = $_SESSION['name'] ?? 'Guest';
@@ -59,6 +66,8 @@ $userInitials = $userInitials ?: 'U';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="../../images/logoooo.png" rel="icon">
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * {
             margin: 0;
@@ -68,6 +77,29 @@ $userInitials = $userInitials ?: 'U';
 
         html {
             scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Smooth scrolling performance for animated elements */
+        .scroll-reveal,
+        .scroll-reveal-fade,
+        .scroll-reveal-left,
+        .scroll-reveal-right,
+        .scroll-reveal-scale {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-perspective: 1000px;
+            perspective: 1000px;
+        }
+
+        /* Remove will-change after animation completes for better performance */
+        .scroll-reveal.revealed,
+        .scroll-reveal-fade.revealed,
+        .scroll-reveal-left.revealed,
+        .scroll-reveal-right.revealed,
+        .scroll-reveal-scale.revealed {
+            will-change: auto;
         }
 
         body {
@@ -697,11 +729,15 @@ $userInitials = $userInitials ?: 'U';
             justify-content: center;
             gap: 15px;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         .product-card:hover .product-overlay {
             opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
         }
 
         .product-action-btn {
@@ -784,6 +820,124 @@ $userInitials = $userInitials ?: 'U';
             font-size: 18px;
             color: #adb5bd;
             text-decoration: line-through;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pagination-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            color: #2f4050;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pagination-btn:hover:not(.disabled) {
+            background: #1ABB9C;
+            border-color: #1ABB9C;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 187, 156, 0.2);
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f8f9fa;
+        }
+
+        .pagination-numbers {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pagination-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            color: #2f4050;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pagination-number:hover:not(.active) {
+            background: #f8f9fa;
+            border-color: #1ABB9C;
+            color: #1ABB9C;
+        }
+
+        .pagination-number.active {
+            background: #1ABB9C;
+            border-color: #1ABB9C;
+            color: white;
+            cursor: default;
+        }
+
+        .pagination-ellipsis {
+            padding: 0 8px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .pagination-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .pagination-btn span {
+                display: none;
+            }
+
+            .pagination-number {
+                min-width: 35px;
+                height: 35px;
+                padding: 0 8px;
+                font-size: 13px;
+            }
+
+            .pagination-info {
+                font-size: 12px;
+            }
         }
 
         /* Product Preview Modal */
@@ -1037,7 +1191,29 @@ $userInitials = $userInitials ?: 'U';
             }
         }
 
-        /* Confirmation Modal */
+        /* Confirmation Modal - Premium Ecommerce Style */
+        @keyframes confirmationSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes confirmationProductSlide {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
         .confirmation-modal {
             display: none;
             position: fixed;
@@ -1045,10 +1221,11 @@ $userInitials = $userInitials ?: 'U';
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
             z-index: 20000;
             overflow-y: auto;
-            animation: fadeIn 0.2s ease;
+            animation: fadeIn 0.3s ease;
         }
 
         .confirmation-modal.active {
@@ -1059,67 +1236,83 @@ $userInitials = $userInitials ?: 'U';
         }
 
         .confirmation-content {
-            background: white;
-            border-radius: 8px;
-            max-width: 900px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            max-width: 550px;
             width: 100%;
-            max-height: 95vh;
+            min-height: 500px;
+            max-height: 90vh;
             overflow-y: auto;
             position: relative;
-            animation: slideUp 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: confirmationSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            overflow: hidden;
         }
 
         .confirmation-header {
-            padding: 15px 20px;
+            padding: 30px 30px 20px 30px;
             text-align: center;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid rgba(233, 236, 239, 0.5);
+            position: relative;
         }
 
         .confirmation-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 4px;
-            background: #e9ecef;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1ABB9C, #117a65);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 8px;
-            font-size: 16px;
-            color: #1ABB9C;
+            margin: 0 auto 15px;
+            font-size: 32px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(26, 187, 156, 0.3);
+            animation: swalSuccessPulse 2s ease-in-out infinite;
         }
 
         .confirmation-title {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 24px;
+            font-weight: 700;
             margin: 0;
-            color: #2f4050;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
         }
 
         .confirmation-body {
-            padding: 20px;
+            padding: 30px;
             text-align: center;
         }
 
         .confirmation-product {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            margin-bottom: 15px;
+            gap: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 25px;
             text-align: left;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(233, 236, 239, 0.8);
+            transition: all 0.3s ease;
+            animation: confirmationProductSlide 0.5s ease-out 0.2s both;
+        }
+
+        .confirmation-product:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
         }
 
         .confirmation-product-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 4px;
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
             object-fit: cover;
-            background: #e9ecef;
+            background: #f8f9fa;
             flex-shrink: 0;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .confirmation-product-info {
@@ -1128,56 +1321,65 @@ $userInitials = $userInitials ?: 'U';
         }
 
         .confirmation-product-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: #2f4050;
-            margin-bottom: 4px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            line-height: 1.3;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .confirmation-product-price {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 700;
             color: #1ABB9C;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
         }
 
         .confirmation-quantity-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #e9ecef;
+            gap: 15px;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 2px solid #e9ecef;
+            flex-wrap: wrap;
         }
 
         .confirmation-quantity-label {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 600;
             color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .quantity-controls {
             display: flex;
             align-items: center;
             gap: 0;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
             overflow: hidden;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .quantity-btn {
-            width: 28px;
-            height: 28px;
+            width: 36px;
+            height: 36px;
             background: white;
             border: none;
             color: #2f4050;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1188,22 +1390,29 @@ $userInitials = $userInitials ?: 'U';
             color: white;
         }
 
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+
         .quantity-btn:disabled {
             background: #f8f9fa;
             color: #adb5bd;
             cursor: not-allowed;
+            opacity: 0.6;
         }
 
         .quantity-input {
-            width: 45px;
-            height: 28px;
+            width: 60px;
+            height: 36px;
             border: none;
             text-align: center;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             color: #1a1a1a;
             background: white;
             outline: none;
+            border-left: 1px solid #e9ecef;
+            border-right: 1px solid #e9ecef;
         }
 
         .quantity-input::-webkit-inner-spin-button,
@@ -1214,59 +1423,124 @@ $userInitials = $userInitials ?: 'U';
 
         .confirmation-total-price {
             margin-left: auto;
-            font-size: 14px;
-            font-weight: 700;
-            color: #dc3545;
+            font-size: 20px;
+            font-weight: 800;
+            color: #1ABB9C;
+            background: linear-gradient(135deg, #1ABB9C, #117a65);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .confirmation-message {
-            font-size: 13px;
+            font-size: 15px;
             color: #6c757d;
-            line-height: 1.5;
-            margin-bottom: 15px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-weight: 500;
         }
 
         .confirmation-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: center;
         }
 
         .confirmation-btn {
             flex: 1;
-            padding: 10px 16px;
+            padding: 14px 30px;
             border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
+            letter-spacing: 0.3px;
         }
 
         .confirmation-btn-cancel {
-            background: #e9ecef;
-            color: #2f4050;
+            background: white;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .confirmation-btn-cancel:hover {
-            background: #dee2e6;
+            background: #f8f9fa;
+            border-color: #1ABB9C;
+            color: #1ABB9C;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.15);
+        }
+
+        .confirmation-btn-cancel:active {
+            transform: translateY(-1px);
         }
 
         .confirmation-btn-confirm {
-            background: #1ABB9C;
+            background: linear-gradient(135deg, #1ABB9C, #117a65);
             color: white;
+            box-shadow: 0 4px 15px rgba(26, 187, 156, 0.3);
+            flex: 0 0 auto;
+            min-width: 150px;
+            max-width: 300px;
         }
 
         .confirmation-btn-confirm:hover {
-            background: #117a65;
+            background: linear-gradient(135deg, #117a65, #0d5d4d);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(26, 187, 156, 0.4);
+        }
+
+        .confirmation-btn-confirm:active {
+            transform: translateY(-1px);
+        }
+
+        .confirmation-modal .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(248, 249, 250, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #adb5bd;
+            z-index: 10001;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .confirmation-modal .modal-close:hover {
+            background: rgba(26, 187, 156, 0.1);
+            color: #1ABB9C;
+            transform: rotate(90deg) scale(1.1);
         }
 
         @media (max-width: 480px) {
             .confirmation-content {
                 max-width: 100%;
+                border-radius: 16px;
+            }
+
+            .confirmation-header {
+                padding: 25px 20px 15px 20px;
+            }
+
+            .confirmation-body {
+                padding: 20px;
             }
 
             .confirmation-actions {
@@ -1276,6 +1550,16 @@ $userInitials = $userInitials ?: 'U';
             .confirmation-product {
                 flex-direction: column;
                 text-align: center;
+                gap: 15px;
+            }
+
+            .confirmation-product-info {
+                text-align: center;
+                width: 100%;
+            }
+
+            .confirmation-quantity-controls {
+                justify-content: center;
             }
         }
 
@@ -1624,6 +1908,205 @@ $userInitials = $userInitials ?: 'U';
             background: #f8f9fa;
         }
 
+        /* Product Carousel */
+        .products-carousel-section {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .carousel-wrapper {
+            display: flex;
+            transition: transform 0.7s cubic-bezier(0.5, 0, 0.5, 1);
+            will-change: transform;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 25px;
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .carousel-product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            flex: 0 0 auto;
+            width: 140px;
+            min-width: 140px;
+        }
+
+        .carousel-product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .carousel-product-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 140px;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        .carousel-product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-product-card:hover .carousel-product-image {
+            transform: scale(1.1);
+        }
+
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+
+        .carousel-nav:hover {
+            background: #1ABB9C;
+            border-color: #1ABB9C;
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-nav.prev {
+            left: 20px;
+        }
+
+        .carousel-nav.next {
+            right: 20px;
+        }
+
+        .carousel-nav.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .carousel-nav.disabled:hover {
+            background: white;
+            border-color: #e9ecef;
+            color: #2f4050;
+            transform: translateY(-50%);
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .carousel-dot.active {
+            background: #1ABB9C;
+            width: 30px;
+            border-radius: 6px;
+        }
+
+        .carousel-dot:hover {
+            background: #1ABB9C;
+        }
+
+        @media (max-width: 1024px) {
+            .carousel-product-card {
+                width: 130px;
+                min-width: 130px;
+            }
+            .carousel-slide {
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .carousel-nav {
+                width: 35px;
+                height: 35px;
+                font-size: 12px;
+            }
+
+            .carousel-nav.prev {
+                left: 10px;
+            }
+
+            .carousel-nav.next {
+                right: 10px;
+            }
+
+            .carousel-slide {
+                gap: 20px;
+                padding: 15px;
+            }
+
+            .carousel-product-card {
+                width: 120px;
+                min-width: 120px;
+            }
+
+            .carousel-product-image-wrapper {
+                min-height: 120px;
+            }
+
+            .products-carousel-section {
+                padding: 0 20px;
+                margin: 30px auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .carousel-slide {
+                gap: 15px;
+                padding: 12px;
+            }
+
+            .carousel-product-card {
+                width: 100px;
+                min-width: 100px;
+            }
+
+            .carousel-product-image-wrapper {
+                min-height: 100px;
+            }
+        }
+
         /* Footer */
         .footer {
             position: relative;
@@ -1752,6 +2235,400 @@ $userInitials = $userInitials ?: 'U';
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Scroll Animation Styles */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translate3d(0, 40px, 0);
+            transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: opacity, transform;
+        }
+
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+
+        .scroll-reveal-fade {
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: opacity;
+        }
+
+        .scroll-reveal-fade.revealed {
+            opacity: 1;
+        }
+
+        .scroll-reveal-left {
+            opacity: 0;
+            transform: translate3d(-60px, 0, 0);
+            transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: opacity, transform;
+        }
+
+        .scroll-reveal-left.revealed {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+
+        .scroll-reveal-right {
+            opacity: 0;
+            transform: translate3d(60px, 0, 0);
+            transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: opacity, transform;
+        }
+
+        .scroll-reveal-right.revealed {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+
+        .scroll-reveal-scale {
+            opacity: 0;
+            transform: translate3d(0, 0, 0) scale(0.85);
+            transition: opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: opacity, transform;
+        }
+
+        .scroll-reveal-scale.revealed {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+
+        /* Stagger delays for grid items - smoother spacing */
+        .scroll-reveal-delay-1 {
+            transition-delay: 0.15s;
+        }
+
+        .scroll-reveal-delay-2 {
+            transition-delay: 0.3s;
+        }
+
+        .scroll-reveal-delay-3 {
+            transition-delay: 0.45s;
+        }
+
+        .scroll-reveal-delay-4 {
+            transition-delay: 0.6s;
+        }
+
+        .scroll-reveal-delay-5 {
+            transition-delay: 0.75s;
+        }
+
+        /* SweetAlert Ecommerce Premium Styles */
+        @keyframes swalSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes swalSuccessPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes swalProductSlide {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .swal-ecommerce-popup {
+            border-radius: 20px !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+        }
+
+        .swal-ecommerce-title {
+            padding: 30px 30px 20px 30px !important;
+            margin: 0 !important;
+            border-bottom: 1px solid rgba(233, 236, 239, 0.5) !important;
+        }
+
+        .swal-success-icon-wrapper {
+            margin-bottom: 15px;
+        }
+
+        .swal-success-icon {
+            font-size: 70px !important;
+            color: #1ABB9C !important;
+            background: linear-gradient(135deg, #1ABB9C, #117a65) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            background-clip: text !important;
+            animation: swalSuccessPulse 2s ease-in-out infinite !important;
+            display: inline-block !important;
+            filter: drop-shadow(0 4px 8px rgba(26, 187, 156, 0.3)) !important;
+        }
+
+        .swal-success-title {
+            font-size: 24px !important;
+            font-weight: 700 !important;
+            color: #1a1a1a !important;
+            letter-spacing: -0.5px !important;
+        }
+
+        .swal-ecommerce-html {
+            padding: 0 30px 30px 30px !important;
+        }
+
+        .swal-product-container {
+            animation: swalProductSlide 0.5s ease-out 0.2s both;
+        }
+
+        .swal-product-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            border: 1px solid rgba(233, 236, 239, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .swal-product-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .swal-product-image-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            flex-shrink: 0;
+        }
+
+        .swal-product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            background: #f8f9fa;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .swal-product-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1ABB9C, #117a65);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(26, 187, 156, 0.4);
+            border: 3px solid white;
+            animation: swalSuccessPulse 1.5s ease-in-out infinite;
+        }
+
+        .swal-product-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .swal-product-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0 0 12px 0;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .swal-product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .swal-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .swal-info-label {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .swal-info-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            background: #f8f9fa;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .swal-info-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1ABB9C;
+        }
+
+        .swal-total-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            margin-top: 5px;
+        }
+
+        .swal-total-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .swal-total-amount {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1ABB9C;
+            background: linear-gradient(135deg, #1ABB9C, #117a65);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .swal-ecommerce-actions {
+            margin: 0 !important;
+            padding: 25px 30px 30px 30px !important;
+            gap: 12px !important;
+            border-top: 1px solid rgba(233, 236, 239, 0.5) !important;
+            background: rgba(248, 249, 250, 0.5) !important;
+        }
+
+        .swal-ecommerce-confirm {
+            background: linear-gradient(135deg, #1ABB9C, #117a65) !important;
+            border-radius: 10px !important;
+            padding: 14px 35px !important;
+            font-weight: 700 !important;
+            font-size: 15px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(26, 187, 156, 0.3) !important;
+            letter-spacing: 0.3px !important;
+        }
+
+        .swal-ecommerce-confirm:hover {
+            background: linear-gradient(135deg, #117a65, #0d5d4d) !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(26, 187, 156, 0.4) !important;
+        }
+
+        .swal-ecommerce-confirm:active {
+            transform: translateY(-1px) !important;
+        }
+
+        .swal-ecommerce-cancel {
+            background: white !important;
+            border: 2px solid #e9ecef !important;
+            border-radius: 10px !important;
+            padding: 14px 35px !important;
+            font-weight: 600 !important;
+            font-size: 15px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            color: #6c757d !important;
+            letter-spacing: 0.3px !important;
+        }
+
+        .swal-ecommerce-cancel:hover {
+            background: #f8f9fa !important;
+            border-color: #1ABB9C !important;
+            color: #1ABB9C !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.15) !important;
+        }
+
+        .swal-ecommerce-cancel:active {
+            transform: translateY(-1px) !important;
+        }
+
+        .swal2-popup .swal2-close {
+            color: #adb5bd !important;
+            font-size: 26px !important;
+            transition: all 0.3s ease !important;
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 50% !important;
+            background: rgba(248, 249, 250, 0.8) !important;
+            top: 15px !important;
+            right: 15px !important;
+            margin-right: 10px !important;
+            margin-top: 10px !important;
+            z-index: 10002 !important;
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            position: absolute !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        .swal2-popup .swal2-close:hover {
+            color: #1ABB9C !important;
+            background: rgba(26, 187, 156, 0.1) !important;
+            transform: rotate(90deg) scale(1.1) !important;
+        }
+        
+        .swal2-popup .swal2-close:active {
+            transform: rotate(90deg) scale(0.95) !important;
+        }
+        
+        /* Ensure close button is always accessible */
+        .swal2-container .swal2-close {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            z-index: 99999 !important;
+        }
+
+        .swal2-popup .swal2-close:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(26, 187, 156, 0.2) !important;
+        }
     </style>
 </head>
 <body>
@@ -1849,6 +2726,59 @@ $userInitials = $userInitials ?: 'U';
         </div>
     </section>
 
+    <!-- Products Carousel Section -->
+    <?php 
+    // Get top 10 newest products for carousel
+    $carouselProducts = array_slice($products, 0, 10);
+    ?>
+    <?php if (!empty($carouselProducts)): ?>
+    <section class="products-carousel-section">
+        <div class="section-header">
+            <h2 class="section-title typing-text" id="featuredProductsTitle"></h2>
+        </div>
+        <div class="carousel-container">
+            <button class="carousel-nav prev" id="carouselPrev" aria-label="Previous slide">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="carousel-nav next" id="carouselNext" aria-label="Next slide">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="carousel-wrapper" id="carouselWrapper">
+                <div class="carousel-slide">
+                    <?php 
+                    // Render products twice for seamless infinite loop
+                    for ($repeat = 0; $repeat < 2; $repeat++): 
+                        foreach ($carouselProducts as $product): 
+                    ?>
+                    <div class="carousel-product-card" 
+                         data-item-id="<?php echo htmlspecialchars($product['item_id']); ?>"
+                         data-item-name="<?php echo htmlspecialchars($product['item_name']); ?>"
+                         data-item-price="<?php echo htmlspecialchars($product['total_cost']); ?>"
+                         data-item-image="<?php echo htmlspecialchars($product['picture']); ?>"
+                         data-item-quantity="<?php echo htmlspecialchars($product['quantity']); ?>"
+                         data-item-description="<?php echo htmlspecialchars($product['description'] ?? $product['category_name'] ?? 'Premium furniture'); ?>"
+                         data-item-category="<?php echo htmlspecialchars($product['category_name'] ?? ''); ?>"
+                         data-category-id="<?php echo htmlspecialchars($product['category_id'] ?? ''); ?>"
+                         onclick="openProductModal(this)">
+                        <div class="carousel-product-image-wrapper">
+                            <img src="../../admin/inventory/<?php echo htmlspecialchars($product['picture']); ?>" 
+                                 alt="<?php echo htmlspecialchars($product['item_name']); ?>" 
+                                 class="carousel-product-image"
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27250%27 height=%27250%27%3E%3Crect fill=%27%23f8f9fa%27 width=%27250%27 height=%27250%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2714%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E';">
+                        </div>
+                    </div>
+                    <?php 
+                        endforeach; 
+                    endfor; 
+                    ?>
+                </div>
+            </div>
+            <div class="carousel-dots" id="carouselDots" style="display: none;">
+                <!-- Dots hidden for single product transition -->
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <script>
         // Cart Management - Using Database API
@@ -1859,7 +2789,11 @@ $userInitials = $userInitials ?: 'U';
         document.addEventListener('DOMContentLoaded', function() {
             loadCartFromDatabase();
             initTypingAnimation();
+            initFeaturedProductsTypingAnimation();
             initHeroTypingAnimation();
+            initScrollAnimations();
+            initPaginationScroll();
+            initProductCarousel();
         });
 
         // Load cart from database
@@ -1925,6 +2859,26 @@ $userInitials = $userInitials ?: 'U';
             if (!titleElement) return;
 
             const text = 'Our Products';
+            const chars = text.split('');
+            
+            // Clear the element
+            titleElement.innerHTML = '';
+            
+            chars.forEach((char, index) => {
+                const span = document.createElement('span');
+                span.className = 'typing-char';
+                span.textContent = char === ' ' ? '\u00A0' : char; // Use non-breaking space for spaces
+                span.style.animationDelay = `${index * 0.1}s`;
+                titleElement.appendChild(span);
+            });
+        }
+
+        // Typing Animation for "Featured Products"
+        function initFeaturedProductsTypingAnimation() {
+            const titleElement = document.getElementById('featuredProductsTitle');
+            if (!titleElement) return;
+
+            const text = 'Featured Products';
             const chars = text.split('');
             
             // Clear the element
@@ -2066,8 +3020,8 @@ $userInitials = $userInitials ?: 'U';
         let pendingCartItem = null;
         let pendingButton = null;
 
-        // Add to Cart from product card -> go to cart page (no modal)
-        async function addToCart(button) {
+        // Add to Cart from product card -> show confirmation modal
+        function addToCart(button) {
             const productCard = button.closest('.product-card');
             const itemId = productCard.dataset.itemId;
             const itemName = productCard.dataset.itemName;
@@ -2075,7 +3029,18 @@ $userInitials = $userInitials ?: 'U';
             const itemImage = productCard.dataset.itemImage;
             const availableQuantity = parseInt(productCard.dataset.itemQuantity) || 0;
 
-            await addItemToCartAndGo(itemId, itemName, itemPrice, availableQuantity, itemImage, button);
+            // Store pending cart item data
+            pendingCartItem = {
+                itemId: itemId,
+                itemName: itemName,
+                price: itemPrice,
+                image: itemImage,
+                availableQuantity: availableQuantity
+            };
+            pendingButton = button;
+
+            // Show confirmation modal
+            showConfirmationModal(itemName, itemPrice, itemImage, availableQuantity);
         }
 
         // Show Confirmation Modal
@@ -2167,7 +3132,10 @@ $userInitials = $userInitials ?: 'U';
         // Update Confirmation Total Price
         function updateConfirmationTotal(price, quantity) {
             const total = price * quantity;
-            document.getElementById('confirmTotalPrice').textContent = 'Total: $' + total.toFixed(2);
+            const totalElement = document.getElementById('confirmTotalPrice');
+            if (totalElement) {
+                totalElement.textContent = '$' + total.toFixed(2);
+            }
         }
 
         // Update Quantity Button States
@@ -2195,16 +3163,16 @@ $userInitials = $userInitials ?: 'U';
             }
         }
 
-        // Direct add to cart helper (no confirmation modal)
-        async function addItemToCartAndGo(itemId, itemName, price, availableQuantity, itemImage, triggerButton = null) {
+        // Direct add to cart helper (no redirect, no confirmation modal)
+        async function addItemToCart(itemId, itemName, price, quantity, availableQuantity, itemImage, triggerButton = null) {
             // Refresh cart from database to get latest quantities
             await loadCartFromDatabase();
 
             // Check stock first
             const existingItem = cart.find(item => item.itemId === itemId);
-            if (existingItem && existingItem.quantity >= availableQuantity) {
+            if (existingItem && (existingItem.quantity + quantity) > availableQuantity) {
                 showNotification('Stock limit reached for this item!', 'warning');
-                return;
+                return false;
             }
 
             // Disable trigger button while processing
@@ -2214,7 +3182,7 @@ $userInitials = $userInitials ?: 'U';
 
             const result = await callCartAPI('add_to_cart', {
                 item_id: itemId,
-                quantity: 1,
+                quantity: quantity,
                 price: price
             });
 
@@ -2224,15 +3192,227 @@ $userInitials = $userInitials ?: 'U';
 
             if (!result.success) {
                 showNotification(result.message || 'Failed to add item to cart', 'warning');
-                return;
+                return false;
             }
 
             await loadCartFromDatabase();
             updateCartBadge();
-            showNotification(`${itemName} added to cart!`, 'success');
+            
+            // Calculate total
+            const total = (price * quantity).toFixed(2);
+            const imageUrl = `../../admin/inventory/${itemImage}`;
+            
+            // Show Premium Ecommerce-style SweetAlert success message
+            Swal.fire({
+                title: '<div class="swal-success-icon-wrapper"><i class="fas fa-check-circle swal-success-icon"></i></div><div class="swal-success-title">Added to Cart!</div>',
+                html: `
+                    <div class="swal-product-container">
+                        <div class="swal-product-card">
+                            <div class="swal-product-image-wrapper">
+                                <img src="${imageUrl}" 
+                                     alt="${itemName}" 
+                                     class="swal-product-image"
+                                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%27 height=%27100%27%3E%3Crect fill=%27%23f8f9fa%27 width=%27100%27 height=%27100%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2714%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E';">
+                                <div class="swal-product-badge">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </div>
+                            <div class="swal-product-details">
+                                <h3 class="swal-product-name">${itemName}</h3>
+                                <div class="swal-product-info">
+                                    <div class="swal-info-item">
+                                        <span class="swal-info-label">Quantity:</span>
+                                        <span class="swal-info-value">${quantity}</span>
+                                    </div>
+                                    <div class="swal-info-item">
+                                        <span class="swal-info-label">Price:</span>
+                                        <span class="swal-info-price">$${price.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swal-total-section">
+                            <span class="swal-total-label">Subtotal:</span>
+                            <span class="swal-total-amount">$${total}</span>
+                        </div>
+                    </div>
+                `,
+                width: '520px',
+                padding: '0',
+                showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-shopping-cart"></i> View Cart',
+                cancelButtonText: '<i class="fas fa-arrow-left"></i> Continue Shopping',
+                confirmButtonColor: '#1ABB9C',
+                cancelButtonColor: '#6c757d',
+                buttonsStyling: true,
+                reverseButtons: true,
+                customClass: {
+                    popup: 'swal-ecommerce-popup',
+                    title: 'swal-ecommerce-title',
+                    htmlContainer: 'swal-ecommerce-html',
+                    confirmButton: 'swal-ecommerce-confirm',
+                    cancelButton: 'swal-ecommerce-cancel',
+                    actions: 'swal-ecommerce-actions'
+                },
+                allowOutsideClick: true,
+                allowEscapeKey: true,
+                showCloseButton: true,
+                closeButtonHtml: '<i class="fas fa-times"></i>',
+                closeButtonAriaLabel: 'Close this dialog',
+                denyButtonText: false,
+                didOpen: () => {
+                    // Add entrance animation
+                    const popup = document.querySelector('.swal-ecommerce-popup');
+                    if (popup) {
+                        popup.style.animation = 'swalSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                    }
+                    
+                    // Force close button functionality - multiple attempts to ensure it works
+                    const setupCloseButton = () => {
+                        const closeButton = document.querySelector('.swal2-close');
+                        if (!closeButton) {
+                            setTimeout(setupCloseButton, 50);
+                            return;
+                        }
+                        
+                        // Ensure button is visible and clickable
+                        closeButton.style.pointerEvents = 'auto';
+                        closeButton.style.cursor = 'pointer';
+                        closeButton.style.zIndex = '10002';
+                        closeButton.style.opacity = '1';
+                        closeButton.style.display = 'flex';
+                        
+                        // Remove all existing listeners by cloning
+                        const newCloseButton = closeButton.cloneNode(true);
+                        closeButton.parentNode.replaceChild(newCloseButton, closeButton);
+                        
+                        // Force close function
+                        const forceClose = (e) => {
+                            if (e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.stopImmediatePropagation();
+                            }
+                            
+                            // Multiple methods to ensure modal closes
+                            setTimeout(() => {
+                                // Method 1: SweetAlert close
+                                if (typeof Swal !== 'undefined' && Swal.close) {
+                                    Swal.close();
+                                }
+                                
+                                // Method 2: Manually remove container
+                                const swalContainer = document.querySelector('.swal2-container');
+                                if (swalContainer) {
+                                    swalContainer.style.opacity = '0';
+                                    setTimeout(() => {
+                                        swalContainer.remove();
+                                        document.body.style.overflow = '';
+                                        document.body.classList.remove('swal2-height-auto');
+                                    }, 200);
+                                }
+                                
+                                // Method 3: Remove backdrop
+                                const backdrop = document.querySelector('.swal2-backdrop-show');
+                                if (backdrop) {
+                                    backdrop.remove();
+                                }
+                            }, 10);
+                            
+                            return false;
+                        };
+                        
+                        // Add event listeners with capture phase
+                        newCloseButton.addEventListener('click', forceClose, { capture: true, once: false });
+                        newCloseButton.addEventListener('mousedown', forceClose, { capture: true, once: false });
+                        newCloseButton.addEventListener('touchstart', forceClose, { capture: true, once: false });
+                        
+                        // Direct onclick as final backup
+                        newCloseButton.onclick = forceClose;
+                        newCloseButton.setAttribute('onclick', 'event.preventDefault(); event.stopPropagation(); Swal.close(); return false;');
+                        
+                        // Store reference for debugging
+                        window.swalCloseButton = newCloseButton;
+                    };
+                    
+                    // Try multiple times to ensure button is found
+                    setupCloseButton();
+                    setTimeout(setupCloseButton, 100);
+                    setTimeout(setupCloseButton, 200);
+                },
+                willClose: () => {
+                    // Clean up when closing
+                    document.body.style.overflow = '';
+                    document.body.classList.remove('swal2-height-auto');
+                    return true;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to cart page
+                    window.location.href = 'cart.php';
+                } else if (result.isDismissed) {
+                    // Modal was closed (via close button, ESC, or Continue Shopping button)
+                    // Force cleanup
+                    const swalContainer = document.querySelector('.swal2-container');
+                    if (swalContainer) {
+                        swalContainer.remove();
+                    }
+                    document.body.style.overflow = '';
+                    document.body.classList.remove('swal2-height-auto');
+                    
+                    // Refresh page if dismissed (Continue Shopping clicked)
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                        window.location.reload();
+                    }
+                }
+            }).catch((error) => {
+                // Force close on any error
+                const swalContainer = document.querySelector('.swal2-container');
+                if (swalContainer) {
+                    swalContainer.remove();
+                }
+                document.body.style.overflow = '';
+                document.body.classList.remove('swal2-height-auto');
+            });
+            
+            // Global close function for manual triggering
+            window.forceCloseSweetAlert = function() {
+                try {
+                    Swal.close();
+                } catch(e) {
+                    const swalContainer = document.querySelector('.swal2-container');
+                    if (swalContainer) {
+                        swalContainer.remove();
+                    }
+                }
+                document.body.style.overflow = '';
+                document.body.classList.remove('swal2-height-auto');
+            };
+            
+            return true;
+        }
 
-            // Go to cart page
-            window.location.href = 'cart.php';
+        // Confirm add to cart from confirmation modal
+        async function confirmAddToCart() {
+            if (!pendingCartItem) return;
+
+            const quantityInput = document.getElementById('confirmQuantity');
+            const quantity = parseInt(quantityInput.value) || 1;
+
+            const success = await addItemToCart(
+                pendingCartItem.itemId,
+                pendingCartItem.itemName,
+                pendingCartItem.price,
+                quantity,
+                pendingCartItem.availableQuantity,
+                pendingCartItem.image,
+                pendingButton
+            );
+
+            if (success) {
+                closeConfirmationModal();
+            }
         }
 
         // Open Product Modal
@@ -2304,8 +3484,8 @@ $userInitials = $userInitials ?: 'U';
             document.body.style.overflow = '';
             }
 
-        // Add to Cart from product detail modal -> go to cart page (no modal)
-        async function addToCartFromModal() {
+        // Add to Cart from product detail modal -> show confirmation modal
+        function addToCartFromModal() {
             const modal = document.getElementById('productModal');
             const itemId = modal.dataset.currentItemId;
             const itemName = modal.dataset.currentItemName;
@@ -2313,7 +3493,21 @@ $userInitials = $userInitials ?: 'U';
             const itemImage = modal.dataset.currentItemImage;
             const availableQuantity = parseInt(modal.dataset.currentItemQuantity) || 0;
 
-            await addItemToCartAndGo(itemId, itemName, itemPrice, availableQuantity, itemImage, document.getElementById('modalAddCartBtn'));
+            // Store pending cart item data
+            pendingCartItem = {
+                itemId: itemId,
+                itemName: itemName,
+                price: itemPrice,
+                image: itemImage,
+                availableQuantity: availableQuantity
+            };
+            pendingButton = document.getElementById('modalAddCartBtn');
+
+            // Close product modal and show confirmation modal
+            closeProductModal();
+            setTimeout(() => {
+                showConfirmationModal(itemName, itemPrice, itemImage, availableQuantity);
+            }, 300);
         }
 
         // Toggle Wishlist
@@ -2447,6 +3641,13 @@ $userInitials = $userInitials ?: 'U';
                 document.body.style.overflow = '';
             }
         }
+        
+        // Continue Shopping with page refresh
+        function continueShopping() {
+            closeCartModal();
+            // Refresh the page to update product availability and cart state
+            window.location.reload();
+        }
 
         // Render Cart Items in Modal
         function renderCartItems() {
@@ -2464,7 +3665,7 @@ $userInitials = $userInitials ?: 'U';
                             <i class="fas fa-shopping-cart"></i>
                         </div>
                         <div class="cart-empty-text">Your cart is empty</div>
-                        <button class="cart-btn cart-btn-continue" onclick="closeCartModal()">
+                        <button class="cart-btn cart-btn-continue" onclick="continueShopping()">
                             <i class="fas fa-arrow-left"></i>
                             Continue Shopping
                         </button>
@@ -2629,17 +3830,290 @@ $userInitials = $userInitials ?: 'U';
                 }, 300);
             }, 3000);
         }
+
+        // Initialize Scroll Animations
+        function initScrollAnimations() {
+            // Create Intersection Observer with smooth triggering
+            const observerOptions = {
+                threshold: 0.05,
+                rootMargin: '0px 0px 100px 0px' // Start animation 100px before element enters viewport
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Use requestAnimationFrame for smoother animation start
+                        requestAnimationFrame(() => {
+                            entry.target.classList.add('revealed');
+                            
+                            // Remove will-change after animation completes for better performance
+                            setTimeout(() => {
+                                entry.target.style.willChange = 'auto';
+                            }, 1200); // Wait for animation to complete
+                        });
+                        // Stop observing once revealed for better performance
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // Get all divs and sections to animate
+            const elementsToAnimate = document.querySelectorAll(`
+                .features-section,
+                .features-grid,
+                .feature-card,
+                .products-section,
+                .section-header,
+                .products-grid,
+                .product-card,
+                .about-section,
+                .about-content,
+                .about-text,
+                .about-sections,
+                .about-subsection,
+                .about-images,
+                .about-image,
+                .footer-content,
+                .footer-section
+            `);
+
+            // Add scroll-reveal classes to elements
+            elementsToAnimate.forEach((element, index) => {
+                // Skip hero section and modals
+                if (element.closest('.hero-section') || 
+                    element.closest('.product-modal') || 
+                    element.closest('.cart-modal') || 
+                    element.closest('.confirmation-modal') ||
+                    element.closest('.header')) {
+                    return;
+                }
+
+                // Determine animation type based on element
+                let animationClass = 'scroll-reveal';
+                
+                if (element.classList.contains('feature-card') || 
+                    element.classList.contains('product-card') ||
+                    element.classList.contains('about-subsection')) {
+                    // Grid items get fade-up with stagger
+                    animationClass = 'scroll-reveal';
+                    const delayIndex = index % 5;
+                    if (delayIndex > 0) {
+                        element.classList.add(`scroll-reveal-delay-${delayIndex}`);
+                    }
+                } else if (element.classList.contains('about-text')) {
+                    animationClass = 'scroll-reveal-left';
+                } else if (element.classList.contains('about-images')) {
+                    animationClass = 'scroll-reveal-right';
+                } else if (element.classList.contains('section-header')) {
+                    animationClass = 'scroll-reveal-fade';
+                } else if (element.classList.contains('footer-content')) {
+                    animationClass = 'scroll-reveal-scale';
+                }
+
+                element.classList.add(animationClass);
+                observer.observe(element);
+            });
+
+            // Also animate any other divs that don't match the selectors above
+            const allDivs = document.querySelectorAll('div');
+            allDivs.forEach((div, index) => {
+                // Skip if already has scroll-reveal class or is in excluded areas
+                if (div.classList.contains('scroll-reveal') ||
+                    div.classList.contains('scroll-reveal-fade') ||
+                    div.classList.contains('scroll-reveal-left') ||
+                    div.classList.contains('scroll-reveal-right') ||
+                    div.classList.contains('scroll-reveal-scale') ||
+                    div.closest('.hero-section') ||
+                    div.closest('.product-modal') ||
+                    div.closest('.cart-modal') ||
+                    div.closest('.confirmation-modal') ||
+                    div.closest('.header') ||
+                    div.closest('.modal-content') ||
+                    div.closest('.user-profile-dropdown') ||
+                    div.closest('.hero-video') ||
+                    div.closest('.hero-overlay')) {
+                    return;
+                }
+
+                // Only animate visible divs with meaningful content
+                const hasContent = div.children.length > 0 || 
+                                   (div.textContent && div.textContent.trim().length > 0);
+                const hasStyles = window.getComputedStyle(div).display !== 'none' &&
+                                 window.getComputedStyle(div).visibility !== 'hidden';
+
+                if (hasContent && hasStyles && div.offsetHeight > 0) {
+                    div.classList.add('scroll-reveal');
+                    observer.observe(div);
+                }
+            });
+        }
+
+        // Initialize Pagination Scroll
+        function initPaginationScroll() {
+            const paginationLinks = document.querySelectorAll('.pagination-btn:not(.disabled), .pagination-number:not(.active)');
+            
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Check if it's an anchor tag
+                    if (this.tagName === 'A') {
+                        const href = this.getAttribute('href');
+                        if (href && href.includes('page=')) {
+                            e.preventDefault();
+                            
+                            // Store the target URL
+                            const targetUrl = href;
+                            
+                            // Smooth scroll to top with a nice transition
+                            window.scrollTo({
+                                top: 0,
+                                behavior: 'smooth'
+                            });
+                            
+                            // Navigate after scroll animation completes (allows for smooth transition)
+                            // Using a longer delay to ensure smooth scroll is visible
+                            setTimeout(() => {
+                                window.location.href = targetUrl;
+                            }, 500);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Initialize Product Carousel
+        function initProductCarousel() {
+            const carouselWrapper = document.getElementById('carouselWrapper');
+            const prevBtn = document.getElementById('carouselPrev');
+            const nextBtn = document.getElementById('carouselNext');
+            
+            if (!carouselWrapper || !prevBtn || !nextBtn) return;
+            
+            let currentIndex = 0;
+            let productWidth = 0;
+            let gap = 0;
+            let totalProducts = 0;
+            let uniqueProducts = 0; // Number of unique products (half of total since duplicated)
+            let autoPlayInterval;
+            let isTransitioning = false;
+            
+            // Calculate product width and gap
+            function calculateDimensions() {
+                const firstCard = carouselWrapper.querySelector('.carousel-product-card');
+                const slide = carouselWrapper.querySelector('.carousel-slide');
+                if (firstCard && slide) {
+                    productWidth = firstCard.offsetWidth;
+                    const slideStyle = window.getComputedStyle(slide);
+                    gap = parseFloat(slideStyle.gap) || 25; // Get gap from CSS grid/flex gap
+                    totalProducts = carouselWrapper.querySelectorAll('.carousel-product-card').length;
+                    uniqueProducts = Math.floor(totalProducts / 2); // Since we duplicated products
+                }
+            }
+            
+            // Update carousel position - move one product at a time
+            function updateCarousel(resetTransition = false) {
+                if (resetTransition) {
+                    // Remove transition for instant reset
+                    carouselWrapper.style.transition = 'none';
+                } else {
+                    // Restore transition
+                    carouselWrapper.style.transition = '';
+                }
+                
+                const translateX = currentIndex * (productWidth + gap);
+                carouselWrapper.style.transform = `translateX(-${translateX}px)`;
+                
+                // Seamlessly reset to beginning when reaching the end of first set
+                if (currentIndex >= uniqueProducts && !resetTransition) {
+                    setTimeout(() => {
+                        currentIndex = currentIndex - uniqueProducts;
+                        updateCarousel(true);
+                        // Restore transition after reset
+                        setTimeout(() => {
+                            carouselWrapper.style.transition = '';
+                        }, 50);
+                    }, 700); // Wait for transition to complete
+                }
+            }
+            
+            // Next product
+            function nextProduct() {
+                currentIndex++;
+                updateCarousel();
+            }
+            
+            // Previous product
+            function prevProduct() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateCarousel();
+                } else {
+                    // If at start, jump to end of first set for seamless loop
+                    currentIndex = uniqueProducts - 1;
+                    updateCarousel(true);
+                    setTimeout(() => {
+                        carouselWrapper.style.transition = '';
+                    }, 50);
+                }
+            }
+            
+            // Auto-play functionality - continuous infinite loop
+            function startAutoPlay() {
+                // Clear any existing interval
+                if (autoPlayInterval) {
+                    clearInterval(autoPlayInterval);
+                }
+                
+                autoPlayInterval = setInterval(() => {
+                    nextProduct();
+                }, 2500); // Change product every 2.5 seconds
+            }
+            
+            function resetAutoPlay() {
+                clearInterval(autoPlayInterval);
+                startAutoPlay();
+            }
+            
+            function stopAutoPlay() {
+                clearInterval(autoPlayInterval);
+            }
+            
+            // Event listeners
+            nextBtn.addEventListener('click', () => {
+                nextProduct();
+                resetAutoPlay();
+            });
+            
+            prevBtn.addEventListener('click', () => {
+                prevProduct();
+                resetAutoPlay();
+            });
+            
+            // Initialize
+            calculateDimensions();
+            updateCarousel();
+            
+            // Start auto-play immediately and continuously
+            startAutoPlay();
+            
+            // Recalculate on resize
+            function handleResize() {
+                calculateDimensions();
+                updateCarousel();
+            }
+            
+            window.addEventListener('resize', handleResize);
+        }
     </script>
 
     <!-- Products Section -->
-    <section class="products-section" id="products">
-        <div class="section-header">
+    <section class="products-section scroll-reveal" id="products">
+        <div class="section-header scroll-reveal-fade">
             <h2 class="section-title typing-text" id="productsTitle"></h2>
             <a href="#" class="see-all-link">See All <i class="fas fa-chevron-right"></i></a>
         </div>
-        <div class="products-grid">
-            <?php if (!empty($products)): ?>
-                <?php foreach ($products as $product): ?>
+        <div class="products-grid scroll-reveal">
+            <?php if (!empty($paginatedProducts)): ?>
+                <?php foreach ($paginatedProducts as $product): ?>
                 <div class="product-card" 
                      data-item-id="<?php echo htmlspecialchars($product['item_id']); ?>"
                      data-item-name="<?php echo htmlspecialchars($product['item_name']); ?>"
@@ -2657,12 +4131,6 @@ $userInitials = $userInitials ?: 'U';
                              onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27280%27 height=%27280%27%3E%3Crect fill=%27%23f8f9fa%27 width=%27280%27 height=%27280%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2714%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E';">
                         <div class="product-overlay">
                             <button class="product-action-btn" onclick="event.stopPropagation(); addToCart(this);">Add to cart</button>
-                            <div class="product-action-icon" onclick="event.stopPropagation();">
-                                <i class="fas fa-share-alt"></i>
-                            </div>
-                            <div class="product-action-icon" onclick="event.stopPropagation();">
-                                <i class="fas fa-heart"></i>
-                            </div>
                         </div>
                     </div>
                     <div class="product-info">
@@ -2681,6 +4149,69 @@ $userInitials = $userInitials ?: 'U';
                 <p style="grid-column: 1 / -1; text-align: center; color: #6c757d; padding: 40px;">No products available at the moment.</p>
             <?php endif; ?>
         </div>
+        
+        <!-- Pagination -->
+        <?php if ($totalPages > 1): ?>
+        <div class="pagination-container">
+            <div class="pagination">
+                <?php if ($currentPage > 1): ?>
+                    <a href="?page=<?php echo $currentPage - 1; ?>" class="pagination-btn pagination-prev">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Previous</span>
+                    </a>
+                <?php else: ?>
+                    <span class="pagination-btn pagination-prev disabled">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Previous</span>
+                    </span>
+                <?php endif; ?>
+                
+                <div class="pagination-numbers">
+                    <?php
+                    $startPage = max(1, $currentPage - 2);
+                    $endPage = min($totalPages, $currentPage + 2);
+                    
+                    if ($startPage > 1): ?>
+                        <a href="?page=1" class="pagination-number">1</a>
+                        <?php if ($startPage > 2): ?>
+                            <span class="pagination-ellipsis">...</span>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    
+                    <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                        <?php if ($i == $currentPage): ?>
+                            <span class="pagination-number active"><?php echo $i; ?></span>
+                        <?php else: ?>
+                            <a href="?page=<?php echo $i; ?>" class="pagination-number"><?php echo $i; ?></a>
+                        <?php endif; ?>
+                    <?php endfor; ?>
+                    
+                    <?php if ($endPage < $totalPages): ?>
+                        <?php if ($endPage < $totalPages - 1): ?>
+                            <span class="pagination-ellipsis">...</span>
+                        <?php endif; ?>
+                        <a href="?page=<?php echo $totalPages; ?>" class="pagination-number"><?php echo $totalPages; ?></a>
+                    <?php endif; ?>
+                </div>
+                
+                <?php if ($currentPage < $totalPages): ?>
+                    <a href="?page=<?php echo $currentPage + 1; ?>" class="pagination-btn pagination-next">
+                        <span>Next</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                <?php else: ?>
+                    <span class="pagination-btn pagination-next disabled">
+                        <span>Next</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                <?php endif; ?>
+            </div>
+            
+            <div class="pagination-info">
+                Showing <?php echo $startIndex + 1; ?>-<?php echo min($startIndex + $itemsPerPage, $totalProducts); ?> of <?php echo $totalProducts; ?> products
+            </div>
+        </div>
+        <?php endif; ?>
     </section>
 
     <!-- Product Preview Modal -->
@@ -2744,7 +4275,7 @@ $userInitials = $userInitials ?: 'U';
                     </div>
                 </div>
                 <div class="cart-modal-actions">
-                    <button class="cart-btn cart-btn-continue" onclick="closeCartModal()">
+                    <button class="cart-btn cart-btn-continue" onclick="continueShopping()">
                         <i class="fas fa-arrow-left"></i>
                         Continue Shopping
                     </button>
@@ -2760,11 +4291,14 @@ $userInitials = $userInitials ?: 'U';
     <!-- Confirmation Modal -->
     <div id="confirmationModal" class="confirmation-modal">
         <div class="confirmation-content">
+            <button class="modal-close" onclick="closeConfirmationModal()" style="position: absolute; top: 15px; right: 15px; z-index: 1;">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="confirmation-header">
                 <div class="confirmation-icon">
                     <i class="fas fa-shopping-cart"></i>
         </div>
-                <h3 class="confirmation-title">Add to Cart?</h3>
+                <h3 class="confirmation-title">Add to Cart</h3>
             </div>
             <div class="confirmation-body">
                 <div class="confirmation-product">
@@ -2783,19 +4317,17 @@ $userInitials = $userInitials ?: 'U';
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            <div class="confirmation-total-price" id="confirmTotalPrice"></div>
                         </div>
                     </div>
                 </div>
-                <p class="confirmation-message">Are you sure you want to add this item to your cart?</p>
+                <div class="confirmation-total-section" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 12px; border: 2px solid #e9ecef; margin-bottom: 20px;">
+                    <span style="font-size: 16px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;">Total:</span>
+                    <span id="confirmTotalPrice" class="confirmation-total-price" style="margin-left: auto; font-size: 28px; font-weight: 800; color: #1ABB9C; background: linear-gradient(135deg, #1ABB9C, #117a65); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></span>
+                </div>
                 <div class="confirmation-actions">
-                    <button class="confirmation-btn confirmation-btn-cancel" onclick="closeConfirmationModal()">
-                        <i class="fas fa-times"></i>
-                        Cancel
-                    </button>
                     <button class="confirmation-btn confirmation-btn-confirm" onclick="confirmAddToCart()">
                         <i class="fas fa-check"></i>
-                        Confirm
+                        Add to Cart
                     </button>
                 </div>
             </div>
@@ -2828,4 +4360,5 @@ $userInitials = $userInitials ?: 'U';
     </footer>
 </body>
 </html>
+
 
