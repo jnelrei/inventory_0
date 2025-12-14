@@ -6,18 +6,26 @@ require_once("../../production/includes/db.php");
 
 // Fetch inventory items with available stock
 try {
-    $stmt = $pdo->query("SELECT i.item_id, i.item_name, i.category_id, c.category_name, i.description, i.quantity, i.total_cost, i.picture, i.barcode, i.created_at FROM invtry i LEFT JOIN category c ON i.category_id = c.category_id WHERE i.quantity > 0 ORDER BY i.item_name ASC");
+    $stmt = $pdo->query("SELECT i.item_id, i.item_name, i.category_id, c.category_name, i.description, i.quantity, i.total_cost, i.image_id, i.barcode, i.created_at FROM invtry i LEFT JOIN category c ON i.category_id = c.category_id WHERE i.quantity > 0 ORDER BY i.item_name ASC");
     $inventory_items = $stmt->fetchAll();
+    
+    // Fetch all images for each item
+    foreach ($inventory_items as &$item) {
+        $img_stmt = $pdo->prepare("SELECT image FROM inventory_images WHERE item_id = ? ORDER BY create_at ASC");
+        $img_stmt->execute([$item['item_id']]);
+        $images = $img_stmt->fetchAll(PDO::FETCH_ASSOC);
+        $item['pictures'] = array_column($images, 'image');
+        $item['picture'] = !empty($item['pictures']) ? $item['pictures'][0] : null; // Keep first image for backward compatibility
+    }
+    unset($item); // Unset reference
 } catch (PDOException $e) {
     $inventory_items = [];
     $error_message = "Error loading inventory: " . $e->getMessage();
 }
 
-// Fetch active discounts
+// Fetch all discounts
 try {
-    $current_date = date('Y-m-d');
-    $stmt = $pdo->prepare("SELECT disc_id, discount_value, start_date, end_date, status FROM discount WHERE status = 'active' AND start_date <= ? AND end_date >= ? ORDER BY discount_value DESC");
-    $stmt->execute([$current_date, $current_date]);
+    $stmt = $pdo->query("SELECT disc_id, discount_value, start_date, end_date, status, created_at FROM discount ORDER BY discount_value DESC");
     $discounts = $stmt->fetchAll();
 } catch (PDOException $e) {
     $discounts = [];
@@ -63,24 +71,32 @@ include("../admin_components/top_navigation.php");
                                         $stock_level = $item['quantity'];
                                         $stock_class = $stock_level > 10 ? 'stock-high' : ($stock_level > 5 ? 'stock-medium' : 'stock-low');
 
-                                        // Calculate image path for cart
-                                        $picture_path = isset($item['picture']) && !empty($item['picture']) ? trim($item['picture']) : '';
-                                        $img_path_for_cart = '';
-                                        if (!empty($picture_path)) {
-                                            if (strpos($picture_path, 'http://') === 0 || strpos($picture_path, 'https://') === 0) {
-                                                $img_path_for_cart = htmlspecialchars($picture_path);
-                                            } else {
-                                                if (strpos($picture_path, 'images/') === 0) {
-                                                    $img_path_for_cart = '../inventory/' . htmlspecialchars($picture_path);
-                                                } else if (strpos($picture_path, 'inventory/images/') === 0) {
-                                                    $img_path_for_cart = '../' . htmlspecialchars($picture_path);
-                                                } else if (strpos($picture_path, '../') === 0) {
-                                                    $img_path_for_cart = htmlspecialchars($picture_path);
-                                                } else {
-                                                    $img_path_for_cart = '../inventory/images/' . htmlspecialchars(basename($picture_path));
+                                        // Process all images for display
+                                        $all_images = [];
+                                        if (!empty($item['pictures']) && is_array($item['pictures'])) {
+                                            foreach ($item['pictures'] as $pic) {
+                                                $picture_path = trim($pic);
+                                                if (!empty($picture_path)) {
+                                                    if (strpos($picture_path, 'http://') === 0 || strpos($picture_path, 'https://') === 0) {
+                                                        $all_images[] = htmlspecialchars($picture_path);
+                                                    } else {
+                                                        if (strpos($picture_path, 'images/') === 0) {
+                                                            $all_images[] = '../inventory/' . htmlspecialchars($picture_path);
+                                                        } else if (strpos($picture_path, 'inventory/images/') === 0) {
+                                                            $all_images[] = '../' . htmlspecialchars($picture_path);
+                                                        } else if (strpos($picture_path, '../') === 0) {
+                                                            $all_images[] = htmlspecialchars($picture_path);
+                                                        } else {
+                                                            $all_images[] = '../inventory/images/' . htmlspecialchars(basename($picture_path));
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
+                                        
+                                        // Calculate image path for cart (use first image)
+                                        $img_path_for_cart = !empty($all_images) ? $all_images[0] : '';
+                                        $has_multiple_images = count($all_images) > 1;
                                     ?>
                                         <div class="col-md-3 col-sm-4 col-xs-6 product-item"
                                             data-name="<?php echo strtolower(htmlspecialchars($item['item_name'])); ?>"
@@ -92,13 +108,17 @@ include("../admin_components/top_navigation.php");
                                             style="margin-bottom: 20px; padding: 0 10px;">
                                             <div class="product-card"
                                                 onclick="addToCart(<?php echo $item['item_id']; ?>, '<?php echo addslashes($item['item_name']); ?>', <?php echo $item['total_cost']; ?>, <?php echo $item['quantity']; ?>, '<?php echo addslashes($img_path_for_cart); ?>')">
-                                                <div class="product-image-container">
-                                                    <?php
-                                                    if (!empty($img_path_for_cart)):
-                                                    ?>
-                                                        <img src="<?php echo $img_path_for_cart; ?>" alt="<?php echo htmlspecialchars($item['item_name']); ?>"
-                                                            class="product-image"
-                                                            onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27150%27 height=%27150%27%3E%3Crect fill=%27%23f0f0f0%27 width=%27150%27 height=%27150%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2714%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E';">
+                                                <div class="product-image-container" data-item-id="<?php echo $item['item_id']; ?>">
+                                                    <?php if (!empty($all_images)): ?>
+                                                        <div class="product-image-slider" data-images='<?php echo json_encode($all_images); ?>' data-auto-scroll="<?php echo $has_multiple_images ? 'true' : 'false'; ?>">
+                                                            <?php foreach ($all_images as $index => $img_path): ?>
+                                                                <img src="<?php echo $img_path; ?>" 
+                                                                     alt="<?php echo htmlspecialchars($item['item_name']); ?>"
+                                                                     class="product-image <?php echo $index === 0 ? 'active' : ''; ?>"
+                                                                     data-index="<?php echo $index; ?>"
+                                                                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27150%27 height=%27150%27%3E%3Crect fill=%27%23f0f0f0%27 width=%27150%27 height=%27150%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2714%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E';">
+                                                            <?php endforeach; ?>
+                                                        </div>
                                                     <?php else: ?>
                                                         <img src="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27150%27 height=%27150%27%3E%3Crect fill=%27%23f0f0f0%27 width=%27150%27 height=%27150%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2714%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E"
                                                             alt="No Image" class="product-image">
@@ -674,8 +694,9 @@ include("../admin_components/top_navigation.php");
                             subtotalAfterDiscount = subtotal;
                         }
 
-                        // Recalculate VAT on discounted subtotal
-                        finalVat = subtotalAfterDiscount * vatRate;
+                        // VAT remains the same (calculated from original subtotal, not discounted)
+                        // Do not recalculate VAT - keep original VAT amount
+                        finalVat = vat; // Keep original VAT unchanged
                         finalTotal = subtotalAfterDiscount + finalVat;
 
                         // Update display
@@ -1076,9 +1097,86 @@ include("../admin_components/top_navigation.php");
         }
     }
 
+    // Auto-scroll product images with smooth slide left animation
+    function initImageAutoScroll() {
+        $('.product-image-slider[data-auto-scroll="true"]').each(function() {
+            const $slider = $(this);
+            const $images = $slider.find('.product-image');
+            const totalImages = $images.length;
+            
+            if (totalImages <= 1) return;
+            
+            let currentIndex = 0;
+            const transitionDuration = 800; // Match CSS transition duration (0.8s)
+            const intervalTime = 3500; // 3.5 seconds per image (allows time for smooth slide)
+            let isTransitioning = false;
+            
+            // Function to show next image with smooth slide left
+            function showNextImage() {
+                if (isTransitioning) return; // Prevent overlapping transitions
+                
+                isTransitioning = true;
+                const prevIndex = currentIndex;
+                currentIndex = (currentIndex + 1) % totalImages;
+                
+                // Get current and next images
+                const $currentImage = $images.eq(prevIndex);
+                const $nextImage = $images.eq(currentIndex);
+                
+                // Use double requestAnimationFrame for perfect synchronization
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        // Start slide animation: current slides out left, next slides in from right
+                        $currentImage.removeClass('active').addClass('slide-out');
+                        $nextImage.removeClass('slide-out').addClass('active');
+                        
+                        // Reset transition flag after animation completes
+                        setTimeout(function() {
+                            // Remove slide-out class and reset next image position for next cycle
+                            $currentImage.removeClass('slide-out');
+                            isTransitioning = false;
+                        }, transitionDuration);
+                    });
+                });
+            }
+            
+            // Pause on hover
+            let scrollInterval;
+            
+            function startAutoScroll() {
+                if (!scrollInterval) {
+                    scrollInterval = setInterval(showNextImage, intervalTime);
+                }
+            }
+            
+            function stopAutoScroll() {
+                if (scrollInterval) {
+                    clearInterval(scrollInterval);
+                    scrollInterval = null;
+                }
+            }
+            
+            // Start auto-scroll
+            startAutoScroll();
+            
+            // Pause on hover
+            $slider.closest('.product-card').hover(
+                function() {
+                    stopAutoScroll();
+                },
+                function() {
+                    startAutoScroll();
+                }
+            );
+        });
+    }
+
     // Initialize
     $(document).ready(function() {
         updateCartDisplay();
+        
+        // Initialize image auto-scroll
+        initImageAutoScroll();
 
         // Focus payment input when cart has items
         $(document).on('click', '#checkoutBtn:not(:disabled)', function() {
@@ -1136,15 +1234,46 @@ include("../admin_components/top_navigation.php");
         background: #f8f9fa;
     }
 
+    .product-image-slider {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
     .product-image {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.3s;
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateX(100%);
+        z-index: 1;
+        will-change: transform;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
     }
 
-    .product-card:hover .product-image {
-        transform: scale(1.1);
+    .product-image.active {
+        transform: translateX(0);
+        z-index: 2;
+    }
+    
+    .product-image.slide-out {
+        transform: translateX(-100%);
+        z-index: 1;
+    }
+    
+    /* Ensure first image is visible if no auto-scroll */
+    .product-image-slider:not([data-auto-scroll="true"]) .product-image:first-child {
+        transform: translateX(0);
+        z-index: 2;
+    }
+
+    .product-card:hover .product-image.active {
+        transform: translateX(0) scale(1.1);
     }
 
     .product-overlay {

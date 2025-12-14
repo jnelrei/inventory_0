@@ -375,7 +375,7 @@ include("../admin_components/top_navigation.php");
   <div class="col-md-6 col-sm-6">
     <div class="x_panel">
       <div class="x_title">
-        <h2 class="sales-chart-title">NUMBER OF SALES</h2>
+        <h2 class="sales-chart-title">NUMBER OF SALES <span id="salesDateRange" style="font-size: 14px; color: #98a6ad; font-weight: 400;"></span></h2>
         <ul class="nav navbar-right panel_toolbox">
           <li>
             <div class="filter-wrapper">
@@ -400,7 +400,7 @@ include("../admin_components/top_navigation.php");
   <div class="col-md-6 col-sm-6  ">
     <div class="x_panel">
       <div class="x_title">
-        <h2 class="sales-chart-title">TOP SELLING PRODUCTS</h2>
+        <h2 class="sales-chart-title">TOP SELLING PRODUCTS <span id="productsDateRange" style="font-size: 14px; color: #98a6ad; font-weight: 400;"></span></h2>
         <ul class="nav navbar-right panel_toolbox">
           <li>
             <div class="filter-wrapper">
@@ -649,6 +649,59 @@ include("../admin_components/top_navigation.php");
     }
   });
 
+  // Helper function to format date range based on filter
+  function getDateRangeText(filter) {
+    const now = new Date();
+    let dateText = '';
+
+    switch (filter) {
+      case 'daily':
+        // Show today's date: "Dec 14" or day name "Monday"
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = dayNames[now.getDay()];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthName = monthNames[now.getMonth()];
+        const day = now.getDate();
+        dateText = `(${monthName} ${day})`;
+        break;
+
+      case 'weekly':
+        // Calculate week range (Sunday to Saturday)
+        const currentDay = now.getDay();
+        const daysSinceSunday = currentDay;
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - daysSinceSunday);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        
+        const startMonth = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][weekStart.getMonth()];
+        const endMonth = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][weekEnd.getMonth()];
+        dateText = `(${startMonth} ${weekStart.getDate()} to ${endMonth} ${weekEnd.getDate()})`;
+        break;
+
+      case 'monthly':
+        // Show month range: "Dec 1 to Dec 31"
+        const monthNameMonthly = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.getMonth()];
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        dateText = `(${monthNameMonthly} 1 to ${monthNameMonthly} ${lastDay})`;
+        break;
+
+      case 'yearly':
+        // Show current month and year: "December 2024"
+        const fullMonthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonth = fullMonthNames[now.getMonth()];
+        const currentYear = now.getFullYear();
+        dateText = `(${currentMonth} ${currentYear})`;
+        break;
+
+      default:
+        dateText = '';
+    }
+
+    return dateText;
+  }
+
   // Sales Line Chart with Dynamic Filtering
   document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('salesLineChart');
@@ -771,10 +824,11 @@ include("../admin_components/top_navigation.php");
               // Update date range display
               const dateRangeElement = document.getElementById('salesDateRange');
               if (dateRangeElement) {
+                // Use provided date_range if available (for weekly), otherwise calculate
                 if (data.date_range) {
                   dateRangeElement.textContent = '(' + data.date_range + ')';
                 } else {
-                  dateRangeElement.textContent = '';
+                  dateRangeElement.textContent = getDateRangeText(filter);
                 }
               }
             } else {
@@ -911,17 +965,40 @@ include("../admin_components/top_navigation.php");
           .then(data => {
             if (data.success) {
               createProductsChart(data.labels, data.data);
+              
+              // Update date range display
+              const dateRangeElement = document.getElementById('productsDateRange');
+              if (dateRangeElement) {
+                const dateRangeText = getDateRangeText(filter);
+                dateRangeElement.textContent = dateRangeText;
+              }
             } else {
               console.error('Error fetching top products:', data.message);
+              // Clear date range on error
+              const dateRangeElement = document.getElementById('productsDateRange');
+              if (dateRangeElement) {
+                dateRangeElement.textContent = '';
+              }
             }
           })
           .catch(error => {
             console.error('Error:', error);
+            // Clear date range on error
+            const dateRangeElement = document.getElementById('productsDateRange');
+            if (dateRangeElement) {
+              dateRangeElement.textContent = '';
+            }
           });
       }
 
       // Load initial data (daily by default)
       fetchTopProducts('daily');
+      
+      // Update date range on initial load
+      const initialDateRangeElement = document.getElementById('productsDateRange');
+      if (initialDateRangeElement) {
+        initialDateRangeElement.textContent = getDateRangeText('daily');
+      }
 
       // Handle filter change with synchronization
       const filterSelect = document.getElementById('productsFilter');
@@ -1212,10 +1289,11 @@ include("../admin_components/top_navigation.php");
               // Update date range display
               const dateRangeElement = document.getElementById('ordersDateRange');
               if (dateRangeElement) {
+                // Use provided date_range if available (for weekly), otherwise calculate
                 if (data.date_range) {
                   dateRangeElement.textContent = '(' + data.date_range + ')';
                 } else {
-                  dateRangeElement.textContent = '';
+                  dateRangeElement.textContent = getDateRangeText(filter);
                 }
               }
             } else {

@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quantity = trim($_POST['quantity'] ?? '0');
     $total_cost = trim($_POST['total_cost'] ?? '0');
     $barcode = trim($_POST['barcode'] ?? '');
-    $picture = null;
+    $uploaded_images = [];
     
     // Validation
     if (empty($item_name)) {
@@ -45,23 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Valid total cost is required";
     }
     
-    // Handle file upload
-    if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
-        $file = $_FILES['picture'];
-        
-        // Validate file type
-        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-        $file_type = $file['type'];
-        
-        if (!in_array($file_type, $allowed_types)) {
-            $errors[] = "Invalid image type. Only JPEG, PNG, GIF, and WebP are allowed.";
-        }
-        
-        // Validate file size (max 5MB)
-        $max_size = 5 * 1024 * 1024; // 5MB in bytes
-        if ($file['size'] > $max_size) {
-            $errors[] = "Image size exceeds 5MB limit";
-        }
+    // Handle multiple file uploads
+    if (isset($_FILES['picture']) && is_array($_FILES['picture']['name'])) {
+        $files = $_FILES['picture'];
+        $file_count = count($files['name']);
         
         // Create upload directory if it doesn't exist (inside inventory folder)
         $upload_dir = 'images/';
@@ -69,37 +56,100 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mkdir($upload_dir, 0777, true);
         }
         
-        // Generate unique filename
-        $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $unique_filename = uniqid('inv_', true) . '.' . $file_extension;
-        $upload_path = $upload_dir . $unique_filename;
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $max_size = 5 * 1024 * 1024; // 5MB in bytes
         
-        // Move uploaded file
-        if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-            $picture = $upload_dir . $unique_filename;
-        } else {
-            $errors[] = "Failed to upload image";
+        for ($i = 0; $i < $file_count; $i++) {
+            // Skip if no file was uploaded for this index
+            if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                if ($files['error'][$i] === UPLOAD_ERR_NO_FILE) {
+                    continue; // Skip empty file inputs
+                } else {
+                    $errors[] = "Error uploading file: " . $files['name'][$i];
+                    continue;
+                }
+            }
+            
+            $file = [
+                'name' => $files['name'][$i],
+                'type' => $files['type'][$i],
+                'tmp_name' => $files['tmp_name'][$i],
+                'error' => $files['error'][$i],
+                'size' => $files['size'][$i]
+            ];
+            
+            // Validate file type
+            if (!in_array($file['type'], $allowed_types)) {
+                $errors[] = "Invalid image type for " . $file['name'] . ". Only JPEG, PNG, GIF, and WebP are allowed.";
+                continue;
+            }
+            
+            // Validate file size (max 5MB)
+            if ($file['size'] > $max_size) {
+                $errors[] = "Image size exceeds 5MB limit for " . $file['name'];
+                continue;
+            }
+            
+            // Generate unique filename
+            $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $unique_filename = uniqid('inv_', true) . '.' . $file_extension;
+            $upload_path = $upload_dir . $unique_filename;
+            
+            // Move uploaded file
+            if (move_uploaded_file($file['tmp_name'], $upload_path)) {
+                $uploaded_images[] = $upload_dir . $unique_filename;
+            } else {
+                $errors[] = "Failed to upload image: " . $file['name'];
+            }
         }
     }
     
     // If no errors, insert into database
     if (empty($errors)) {
         try {
+            // Start transaction
+            $pdo->beginTransaction();
+            
             // Generate barcode if not provided
             if (empty($barcode)) {
                 $barcode = time() . rand(1000, 9999);
             }
             
-            $stmt = $pdo->prepare("INSERT INTO invtry (item_name, category_id, description, quantity, total_cost, picture, barcode, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
+            // Insert into invtry table
+            $stmt = $pdo->prepare("INSERT INTO invtry (item_name, category_id, description, quantity, total_cost, barcode, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
             $stmt->execute([
                 $item_name,
                 $category_id,
                 $description ?: null,
                 $quantity,
                 $total_cost,
-                $picture,
                 $barcode ?: null
             ]);
+            
+            $item_id = $pdo->lastInsertId();
+            $first_image_id = null;
+            
+            // Insert images into inventory_images table
+            if (!empty($uploaded_images)) {
+                foreach ($uploaded_images as $image_path) {
+                    $stmt = $pdo->prepare("INSERT INTO inventory_images (image, item_id, create_at) VALUES (?, ?, NOW())");
+                    $stmt->execute([$image_path, $item_id]);
+                    
+                    // Store first image_id for invtry table
+                    if ($first_image_id === null) {
+                        $first_image_id = $pdo->lastInsertId();
+                    }
+                }
+                
+                // Update invtry table with first image_id
+                if ($first_image_id !== null) {
+                    $stmt = $pdo->prepare("UPDATE invtry SET image_id = ? WHERE item_id = ?");
+                    $stmt->execute([$first_image_id, $item_id]);
+                }
+            }
+            
+            // Commit transaction
+            $pdo->commit();
             
             $_SESSION['inventory_message'] = 'Inventory item added successfully!';
             $_SESSION['inventory_success'] = true;
@@ -107,9 +157,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
             
         } catch(PDOException $e) {
-            // If database insert fails, delete uploaded image
-            if ($picture && file_exists($picture)) {
-                unlink($picture);
+            // Rollback transaction
+            $pdo->rollBack();
+            
+            // If database insert fails, delete uploaded images
+            foreach ($uploaded_images as $image_path) {
+                if (file_exists($image_path)) {
+                    unlink($image_path);
+                }
             }
             
             $_SESSION['inventory_message'] = 'Error adding inventory item: ' . $e->getMessage();
@@ -118,9 +173,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
     } else {
-        // If validation errors, delete uploaded image if any
-        if ($picture && file_exists($picture)) {
-            unlink($picture);
+        // If validation errors, delete uploaded images if any
+        foreach ($uploaded_images as $image_path) {
+            if (file_exists($image_path)) {
+                unlink($image_path);
+            }
         }
         
         $_SESSION['inventory_message'] = implode('<br>', $errors);

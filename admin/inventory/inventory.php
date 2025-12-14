@@ -6,8 +6,17 @@ require_once("../../production/includes/db.php");
 
 // Fetch inventory data from database
 try {
-    $stmt = $pdo->query("SELECT i.item_id, i.item_name, i.category_id, c.category_name, i.description, i.quantity, i.total_cost, i.picture, i.created_at FROM invtry i LEFT JOIN category c ON i.category_id = c.category_id ORDER BY i.created_at DESC");
+    $stmt = $pdo->query("SELECT i.item_id, i.item_name, i.category_id, c.category_name, i.description, i.quantity, i.total_cost, i.image_id, i.created_at FROM invtry i LEFT JOIN category c ON i.category_id = c.category_id ORDER BY i.created_at DESC");
     $inventory_items = $stmt->fetchAll();
+    
+    // Fetch images for each item
+    foreach ($inventory_items as &$item) {
+        $img_stmt = $pdo->prepare("SELECT image FROM inventory_images WHERE item_id = ? ORDER BY create_at ASC LIMIT 1");
+        $img_stmt->execute([$item['item_id']]);
+        $image = $img_stmt->fetch(PDO::FETCH_ASSOC);
+        $item['picture'] = $image ? $image['image'] : null;
+    }
+    unset($item); // Unset reference
 } catch(PDOException $e) {
     $inventory_items = [];
     $error_message = "Error loading inventory: " . $e->getMessage();
@@ -38,8 +47,11 @@ include("../admin_components/top_navigation.php");
                           <div class="col-sm-12">
                             <div class="card-box table-responsive">
                     <?php if (isset($error_message)): ?>
-                      <div class="alert alert-danger">
-                        <?php echo htmlspecialchars($error_message); ?>
+                      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Database Error:</strong> <?php echo htmlspecialchars($error_message); ?>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
                       </div>
                     <?php endif; ?>
                     
@@ -72,7 +84,7 @@ include("../admin_components/top_navigation.php");
                       </div>
                     <?php endif; ?>
                     
-                    <table id="datatable" class="table table-striped table-bordered" style="width:100%; visibility: hidden;">
+                    <table id="datatable" class="table table-striped table-bordered" style="width:100%;">
                       <thead>
                         <tr>
                           <th>Picture</th>
@@ -139,32 +151,45 @@ include("../admin_components/top_navigation.php");
 <script>
 // Initialize DataTable with custom settings without flickering
 $(document).ready(function() {
+    var initAttempts = 0;
+    var maxAttempts = 20; // Try for 1 second (20 * 50ms)
+    
     function initInventoryTable() {
+        initAttempts++;
+        
         // Check if DataTables is available
         if (typeof $.fn.DataTable === 'undefined') {
-            setTimeout(initInventoryTable, 50);
+            if (initAttempts < maxAttempts) {
+                setTimeout(initInventoryTable, 50);
+            } else {
+                // If DataTables still not available after max attempts, show table anyway
+                console.warn('DataTables library not found. Showing table without DataTables features.');
+                $('#datatable').css('visibility', 'visible');
+            }
             return;
         }
         
-        // Destroy existing DataTable instance if it exists (from custom.js)
-        if ($.fn.DataTable.isDataTable('#datatable')) {
-            $('#datatable').DataTable().destroy();
-        }
-        
-        // Initialize DataTable with custom configuration
-        $('#datatable').DataTable({
-            "order": [[6, 'desc']], // Sort by Created At column (index 6) in descending order
-            "columnDefs": [
-                { "orderable": false, "targets": [0, 7] } // Disable sorting on Picture column (index 0) and Actions column (index 7)
-            ],
-            "initComplete": function() {
-                // Show table only after initialization is complete (prevents flickering)
-                $('#datatable').css('visibility', 'visible');
+        try {
+            // Destroy existing DataTable instance if it exists (from custom.js)
+            if ($.fn.DataTable.isDataTable('#datatable')) {
+                $('#datatable').DataTable().destroy();
             }
-        });
+            
+            // Initialize DataTable with custom configuration
+            $('#datatable').DataTable({
+                "order": [[6, 'desc']], // Sort by Created At column (index 6) in descending order
+                "columnDefs": [
+                    { "orderable": false, "targets": [0, 7] } // Disable sorting on Picture column (index 0) and Actions column (index 7)
+                ]
+            });
+        } catch (error) {
+            console.error('Error initializing DataTable:', error);
+            // Show table even if DataTables initialization fails
+            $('#datatable').css('visibility', 'visible');
+        }
     }
     
-    // Initialize after custom.js loads, but hide flickering
+    // Initialize after custom.js loads
     setTimeout(initInventoryTable, 150);
     
     // Show SweetAlert for success messages
