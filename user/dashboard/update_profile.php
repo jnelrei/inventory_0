@@ -6,7 +6,7 @@ require_once("../../production/includes/db.php");
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../../index.php');
+    echo json_encode(['success' => false, 'message' => 'User not logged in']);
     exit();
 }
 
@@ -44,8 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle picture deletion
     if ($delete_picture && $existing_picture) {
         // Delete the file if it exists
-        if (file_exists($existing_picture)) {
-            unlink($existing_picture);
+        $fullPath = (strpos($existing_picture, '/') === 0) ? $existing_picture : __DIR__ . '/' . $existing_picture;
+        if (file_exists($fullPath)) {
+            unlink($fullPath);
         }
         $picture = null;
     }
@@ -69,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Create upload directory if it doesn't exist
-        $upload_dir = 'images/';
+        $upload_dir = __DIR__ . '/images/';
         if (!file_exists($upload_dir)) {
             mkdir($upload_dir, 0777, true);
         }
@@ -82,10 +83,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Move uploaded file
         if (move_uploaded_file($file['tmp_name'], $upload_path)) {
             // Delete old picture if it exists and is different
-            if ($existing_picture && file_exists($existing_picture) && $existing_picture !== $upload_path) {
-                unlink($existing_picture);
+            if ($existing_picture) {
+                $oldPath = (strpos($existing_picture, '/') === 0) ? $existing_picture : __DIR__ . '/' . $existing_picture;
+                if (file_exists($oldPath) && $oldPath !== $upload_path) {
+                    unlink($oldPath);
+                }
             }
-            $picture = $upload_path;
+            // Store relative path
+            $picture = 'images/' . $unique_filename;
         } else {
             $errors[] = "Failed to upload image";
         }
@@ -105,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Update session data
             $_SESSION['name'] = $name;
+            $_SESSION['username'] = $username;
             
             echo json_encode([
                 'success' => true,
@@ -114,8 +120,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
         } catch(PDOException $e) {
             // If database update fails, delete uploaded image if it was new
-            if ($picture !== $existing_picture && $picture && file_exists($picture)) {
-                unlink($picture);
+            if ($picture && $picture !== $existing_picture) {
+                $fullPath = __DIR__ . '/' . $picture;
+                if (file_exists($fullPath)) {
+                    unlink($fullPath);
+                }
             }
             
             echo json_encode([
@@ -144,12 +153,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 ?>
-
-
-
-
-
-
-
 
 

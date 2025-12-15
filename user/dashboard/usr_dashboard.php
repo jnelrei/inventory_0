@@ -55,6 +55,29 @@ if (!empty($userName)) {
     }
 }
 $userInitials = $userInitials ?: 'U';
+
+// Fetch user profile picture
+$profilePicture = null;
+if (isset($_SESSION['user_id'])) {
+    try {
+        $stmt = $pdo->prepare("SELECT picture FROM users WHERE user_id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($userData && !empty($userData['picture'])) {
+            $profilePicture = $userData['picture'];
+            // Handle relative paths
+            if (strpos($profilePicture, '/') !== 0 && strpos($profilePicture, 'http') !== 0) {
+                // Check if file exists
+                $fullPath = __DIR__ . '/' . $profilePicture;
+                if (!file_exists($fullPath)) {
+                    $profilePicture = null;
+                }
+            }
+        }
+    } catch(PDOException $e) {
+        $profilePicture = null;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -278,6 +301,15 @@ $userInitials = $userInitials ?: 'U';
             justify-content: center;
             font-weight: 700;
             font-size: 13px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
         }
 
         .user-profile-dropdown {
@@ -725,9 +757,10 @@ $userInitials = $userInitials ?: 'U';
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             display: flex;
+            flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -750,11 +783,58 @@ $userInitials = $userInitials ?: 'U';
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .product-action-btn:hover {
             background: #1ABB9C;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 187, 156, 0.3);
+        }
+
+        .product-overlay-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-overlay-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #1a1a1a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .product-overlay-icon:hover {
+            background: #1ABB9C;
+            color: white;
+            border-color: #1ABB9C;
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 6px 20px rgba(26, 187, 156, 0.4);
+        }
+
+        .product-overlay-icon.wishlist.active {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .product-overlay-icon.wishlist.active:hover {
+            background: #c82333;
+            border-color: #c82333;
         }
 
         .product-card {
@@ -984,11 +1064,12 @@ $userInitials = $userInitials ?: 'U';
         .modal-content {
             background: white;
             border-radius: 16px;
-            max-width: 900px;
-            width: 100%;
-            max-height: 90vh;
+            max-width: 1000px;
+            width: 90%;
+            max-height: 85vh;
             overflow-y: auto;
             position: relative;
+            z-index: 2;
             animation: slideUp 0.3s ease;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
@@ -1021,19 +1102,204 @@ $userInitials = $userInitials ?: 'U';
 
         .modal-body {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            padding: 40px;
+            grid-template-columns: 70px 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
         }
 
         .modal-image-wrapper {
+            display: flex;
+            gap: 24px;
             width: 100%;
-            height: 400px;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #f8f9fa;
             position: sticky;
             top: 20px;
+            height: fit-content;
+        }
+        
+        .modal-thumbnails-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 70px;
+            flex-shrink: 0;
+        }
+        
+        .modal-main-image-container {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(135deg, #e8d5ff 0%, #d4b3ff 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-image-main-container {
+            width: 100%;
+            height: 100%;
+            min-height: 450px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .modal-carousel-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-carousel-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        .modal-carousel-item {
+            min-width: 100%;
+            width: 100%;
+            height: 100%;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .modal-carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .modal-image-main {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-carousel-indicators {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .modal-carousel-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-carousel-indicator.active {
+            background: #1ABB9C;
+            border-color: #1ABB9C;
+            transform: scale(1.2);
+        }
+
+        .modal-carousel-indicator:hover {
+            background: rgba(26, 187, 156, 0.7);
+            border-color: #1ABB9C;
+        }
+
+        .modal-image-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #2f4050;
+            z-index: 10;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-image-nav:hover {
+            background: #1ABB9C;
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .modal-image-nav.prev {
+            left: 20px;
+        }
+
+        .modal-image-nav.next {
+            right: 20px;
+        }
+
+        .modal-image-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .modal-image-thumbnails {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-thumbnail {
+            width: 70px;
+            height: 70px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            background: #fff;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .modal-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-thumbnail.active {
+            border-color: #1ABB9C;
+            border-width: 3px;
+            box-shadow: 0 2px 8px rgba(26, 187, 156, 0.3);
+        }
+
+        .modal-thumbnail:hover {
+            border-color: #1ABB9C;
+            transform: scale(1.05);
+        }
+
+        .modal-thumbnail-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 10px;
+            padding: 2px 4px;
+            text-align: center;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .modal-image {
@@ -1045,7 +1311,8 @@ $userInitials = $userInitials ?: 'U';
         .modal-info {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
+            padding-left: 20px;
         }
 
         .modal-title {
@@ -1111,8 +1378,9 @@ $userInitials = $userInitials ?: 'U';
 
         .modal-actions {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-top: 10px;
+            align-items: center;
         }
 
         .modal-add-cart-btn {
@@ -1144,7 +1412,8 @@ $userInitials = $userInitials ?: 'U';
             transform: none;
         }
 
-        .modal-wishlist-btn {
+        .modal-wishlist-btn,
+        .modal-share-btn {
             width: 50px;
             height: 50px;
             border-radius: 8px;
@@ -1157,11 +1426,16 @@ $userInitials = $userInitials ?: 'U';
             justify-content: center;
             font-size: 20px;
             transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
-        .modal-wishlist-btn:hover {
+        .modal-wishlist-btn:hover,
+        .modal-share-btn:hover {
             border-color: #1ABB9C;
             color: #1ABB9C;
+            background: #f0fdf4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 187, 156, 0.2);
         }
 
         .modal-wishlist-btn.active {
@@ -1170,24 +1444,87 @@ $userInitials = $userInitials ?: 'U';
             color: white;
         }
 
-        @media (max-width: 768px) {
+        .modal-wishlist-btn.active:hover {
+            background: #c82333;
+            border-color: #c82333;
+            color: white;
+        }
+
+        .modal-share-btn:hover {
+            background: #e7f5ff;
+            border-color: #1ABB9C;
+            color: #1ABB9C;
+        }
+
+        @media (max-width: 1024px) {
             .modal-body {
                 grid-template-columns: 1fr;
                 gap: 30px;
-                padding: 30px 20px;
+            }
+            
+            .modal-thumbnails-vertical {
+                flex-direction: row;
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .modal-image-wrapper {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .modal-body {
+                padding: 20px 15px;
             }
 
-            .modal-image-wrapper {
-                height: 250px;
-                position: relative;
+            .modal-image-main-container {
+                min-height: 300px;
+            }
+            
+            .modal-main-image-container {
+                min-height: 300px;
+            }
+
+            .modal-image-nav {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+
+            .modal-thumbnail {
+                width: 50px;
+                height: 50px;
             }
 
             .modal-title {
-                font-size: 24px;
+                font-size: 22px;
             }
 
             .modal-price-current {
-                font-size: 28px;
+                font-size: 24px;
+            }
+            
+            .modal-info {
+                padding-left: 0;
+            }
+
+            .modal-actions {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .modal-add-cart-btn {
+                width: 100%;
+                order: 1;
+            }
+
+            .modal-share-btn,
+            .modal-wishlist-btn {
+                flex: 1;
+                min-width: 45px;
+                order: 2;
             }
         }
 
@@ -1983,7 +2320,7 @@ $userInitials = $userInitials ?: 'U';
             background: white;
             border: 2px solid #e9ecef;
             border-radius: 50%;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -2233,6 +2570,26 @@ $userInitials = $userInitials ?: 'U';
 
             .features-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .product-overlay {
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .product-action-btn {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+
+            .product-overlay-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .product-overlay-actions {
+                gap: 8px;
             }
         }
 
@@ -2659,7 +3016,13 @@ $userInitials = $userInitials ?: 'U';
                     <span class="cart-badge">0</span>
                 </a>
                 <div class="user-profile" id="userProfile" onclick="event.stopPropagation(); toggleUserDropdown()">
-                    <div class="user-avatar"><?php echo $userInitials; ?></div>
+                    <div class="user-avatar">
+                        <?php if ($profilePicture): ?>
+                            <img src="<?php echo htmlspecialchars($profilePicture); ?>" alt="Profile Picture">
+                        <?php else: ?>
+                            <?php echo $userInitials; ?>
+                        <?php endif; ?>
+                    </div>
                     <span style="font-weight: 600; font-size: 14px;"><?php echo htmlspecialchars($userName); ?></span>
                     <i class="fas fa-chevron-down user-profile-arrow"></i>
                     <div class="user-profile-dropdown">
@@ -2669,7 +3032,7 @@ $userInitials = $userInitials ?: 'U';
                         </div>
                         <ul class="user-dropdown-menu">
                             <li class="user-dropdown-item">
-                                <a href="#" class="user-dropdown-link">
+                                <a href="profile.php" class="user-dropdown-link">
                                     <i class="fas fa-user"></i>
                                     <span>My Profile</span>
                                 </a>
@@ -3416,6 +3779,48 @@ $userInitials = $userInitials ?: 'U';
         }
 
         // Open Product Modal
+        // Current image index for modal gallery
+        let currentModalImageIndex = 0;
+        let modalImages = [];
+        let carouselAutoPlayInterval = null;
+        let carouselAutoPlayDelay = 3000; // 3 seconds between slides
+        let carouselPauseTimeout = null;
+
+        // Start automatic carousel
+        function startCarouselAutoPlay() {
+            // Clear any existing interval
+            stopCarouselAutoPlay();
+            
+            // Only start if there's more than one image
+            if (modalImages.length <= 1) return;
+            
+            carouselAutoPlayInterval = setInterval(() => {
+                changeModalImage(1); // Move to next image
+            }, carouselAutoPlayDelay);
+        }
+
+        // Stop automatic carousel
+        function stopCarouselAutoPlay() {
+            if (carouselAutoPlayInterval) {
+                clearInterval(carouselAutoPlayInterval);
+                carouselAutoPlayInterval = null;
+            }
+            if (carouselPauseTimeout) {
+                clearTimeout(carouselPauseTimeout);
+                carouselPauseTimeout = null;
+            }
+        }
+
+        // Pause auto-play temporarily (e.g., on user interaction)
+        function pauseCarouselAutoPlay() {
+            stopCarouselAutoPlay();
+            
+            // Resume after 5 seconds of inactivity
+            carouselPauseTimeout = setTimeout(() => {
+                startCarouselAutoPlay();
+            }, 5000);
+        }
+
         function openProductModal(productCard) {
             const modal = document.getElementById('productModal');
             const itemId = productCard.dataset.itemId;
@@ -3426,9 +3831,36 @@ $userInitials = $userInitials ?: 'U';
             const itemDescription = productCard.dataset.itemDescription || '';
             const itemCategory = productCard.dataset.itemCategory || '';
 
-            // Set modal content
-            document.getElementById('modalImage').src = '../../admin/inventory/' + itemImage;
-            document.getElementById('modalImage').alt = itemName;
+            // Get multiple images - check for data-item-images attribute first, then generate from base image
+            let images = [];
+            if (productCard.dataset.itemImages) {
+                // If multiple images provided as comma-separated string
+                images = productCard.dataset.itemImages.split(',').map(img => img.trim());
+            } else {
+                // Generate image variants based on naming convention
+                const baseImage = itemImage;
+                const basePath = baseImage.substring(0, baseImage.lastIndexOf('.'));
+                const extension = baseImage.substring(baseImage.lastIndexOf('.'));
+                
+                // Create 5 images showing different product views: Main, Front, Back, Left, Right
+                // Main image is the existing one, then look for variants
+                images.push(baseImage); // Main/Front view
+                const imageViews = ['_back', '_left', '_right', '_top']; // 4 additional views
+                for (let i = 0; i < 4; i++) {
+                    const imageName = basePath + imageViews[i] + extension;
+                    images.push(imageName);
+                }
+            }
+
+            // Filter out empty images and set modal images
+            modalImages = images.filter(img => img && img.trim() !== '');
+            if (modalImages.length === 0) {
+                modalImages = [itemImage]; // Fallback to single image
+            }
+
+            currentModalImageIndex = 0;
+            updateModalImageGallery();
+
             document.getElementById('modalTitle').textContent = itemName;
             document.getElementById('modalCategory').textContent = itemCategory || 'Product';
             document.getElementById('modalDescription').textContent = itemDescription;
@@ -3475,6 +3907,228 @@ $userInitials = $userInitials ?: 'U';
             // Show modal
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
+            
+            // Start automatic carousel
+            startCarouselAutoPlay();
+        }
+
+        // Update modal image gallery
+        function updateModalImageGallery() {
+            if (modalImages.length === 0) return;
+
+            const carouselTrack = document.getElementById('modalCarouselTrack');
+            const thumbnailsContainer = document.getElementById('modalImageThumbnails');
+            const indicatorsContainer = document.getElementById('modalCarouselIndicators');
+            const prevBtn = document.getElementById('modalImagePrev');
+            const nextBtn = document.getElementById('modalImageNext');
+
+            // Clear existing carousel items
+            if (carouselTrack) carouselTrack.innerHTML = '';
+            if (indicatorsContainer) indicatorsContainer.innerHTML = '';
+
+            // Update navigation buttons
+            if (prevBtn) {
+                prevBtn.disabled = modalImages.length <= 1;
+                prevBtn.style.display = modalImages.length <= 1 ? 'none' : 'flex';
+            }
+            if (nextBtn) {
+                nextBtn.disabled = modalImages.length <= 1;
+                nextBtn.style.display = modalImages.length <= 1 ? 'none' : 'flex';
+            }
+
+            if (modalImages.length === 0) return;
+
+            // Create carousel items with duplicate images for seamless loop
+            // Add last image at the beginning and first image at the end for infinite loop
+            const imagesForCarousel = modalImages.length > 1 
+                ? [modalImages[modalImages.length - 1], ...modalImages, modalImages[0]]
+                : modalImages;
+
+            imagesForCarousel.forEach((image, index) => {
+                const carouselItem = document.createElement('div');
+                carouselItem.className = 'modal-carousel-item';
+                
+                const img = document.createElement('img');
+                img.src = '../../admin/inventory/' + image;
+                img.alt = 'Product Image ' + (index + 1);
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27500%27 height=%27500%27%3E%3Crect fill=%27%23f8f9fa%27 width=%27500%27 height=%27500%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2714%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E';
+                };
+                
+                carouselItem.appendChild(img);
+                if (carouselTrack) carouselTrack.appendChild(carouselItem);
+            });
+
+            // Set initial position (skip the first duplicate if looping)
+            // Ensure transition is enabled
+            if (carouselTrack) {
+                carouselTrack.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                if (modalImages.length > 1) {
+                    carouselTrack.style.transform = `translateX(-${100}%)`;
+                } else {
+                    carouselTrack.style.transform = 'translateX(0)';
+                }
+            }
+
+            // Generate indicators (if container exists)
+            if (indicatorsContainer && modalImages.length > 1) {
+                modalImages.forEach((image, index) => {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'modal-carousel-indicator' + (index === currentModalImageIndex ? ' active' : '');
+                    indicator.onclick = () => selectModalImage(index);
+                    indicatorsContainer.appendChild(indicator);
+                });
+            }
+
+            // Generate thumbnails (only if more than one image)
+            if (!thumbnailsContainer) return;
+            
+            thumbnailsContainer.innerHTML = '';
+            if (modalImages.length <= 1) {
+                thumbnailsContainer.style.display = 'none';
+            } else {
+                thumbnailsContainer.style.display = 'flex';
+                const viewLabels = ['Main', 'Back', 'Left', 'Right', 'Top'];
+                
+                modalImages.forEach((image, index) => {
+                const thumbnail = document.createElement('div');
+                thumbnail.className = 'modal-thumbnail' + (index === currentModalImageIndex ? ' active' : '');
+                thumbnail.onclick = () => selectModalImage(index);
+                
+                const img = document.createElement('img');
+                img.src = '../../admin/inventory/' + image;
+                img.alt = 'Thumbnail ' + (index + 1);
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2770%27 height=%2770%27%3E%3Crect fill=%27%23f8f9fa%27 width=%2770%27 height=%2770%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2710%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E';
+                };
+                
+                const label = document.createElement('div');
+                label.className = 'modal-thumbnail-label';
+                label.textContent = viewLabels[index] || 'View ' + (index + 1);
+                
+                    thumbnail.appendChild(img);
+                    thumbnail.appendChild(label);
+                    thumbnailsContainer.appendChild(thumbnail);
+                });
+            }
+            
+            // Set up hover pause functionality
+            setupCarouselHoverPause();
+        }
+
+        // Set up hover pause for carousel
+        function setupCarouselHoverPause() {
+            const carouselWrapper = document.querySelector('.modal-carousel-wrapper');
+            const modalImageWrapper = document.querySelector('.modal-image-wrapper');
+            
+            if (!carouselWrapper || !modalImageWrapper) return;
+            
+            // Remove existing listeners if any
+            const newCarouselWrapper = carouselWrapper.cloneNode(true);
+            carouselWrapper.parentNode.replaceChild(newCarouselWrapper, carouselWrapper);
+            
+            // Add hover event listeners
+            modalImageWrapper.addEventListener('mouseenter', () => {
+                stopCarouselAutoPlay();
+            });
+            
+            modalImageWrapper.addEventListener('mouseleave', () => {
+                startCarouselAutoPlay();
+            });
+        }
+
+        // Change modal image (next/prev) with carousel transition and endless loop
+        function changeModalImage(direction, isUserInteraction = false) {
+            if (modalImages.length <= 1) return;
+            
+            // Pause auto-play if this is a user interaction
+            if (isUserInteraction) {
+                pauseCarouselAutoPlay();
+            }
+            
+            const carouselTrack = document.getElementById('modalCarouselTrack');
+            const indicators = document.querySelectorAll('.modal-carousel-indicator');
+            const thumbnails = document.querySelectorAll('.modal-thumbnail');
+            
+            // Get current position
+            const currentTransform = carouselTrack.style.transform || 'translateX(-100%)';
+            const currentPosition = Math.abs(parseInt(currentTransform.match(/-?\d+/)?.[0] || 100) / 100);
+            
+            // Update index
+            currentModalImageIndex += direction;
+            
+            // Handle loop - if we're at the end, wrap to beginning (or vice versa)
+            if (currentModalImageIndex < 0) {
+                currentModalImageIndex = modalImages.length - 1;
+            } else if (currentModalImageIndex >= modalImages.length) {
+                currentModalImageIndex = 0;
+            }
+            
+            // Calculate translateX position (add 1 because first item is duplicate)
+            const translateX = -(currentModalImageIndex + 1) * 100;
+            carouselTrack.style.transform = `translateX(${translateX}%)`;
+            
+            // Update indicators
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentModalImageIndex);
+            });
+            
+            // Update thumbnails
+            thumbnails.forEach((thumbnail, index) => {
+                thumbnail.classList.toggle('active', index === currentModalImageIndex);
+            });
+            
+            // Handle seamless loop - reset position after transition completes
+            setTimeout(() => {
+                const finalPosition = Math.abs(parseInt(carouselTrack.style.transform.match(/-?\d+/)?.[0] || 100) / 100);
+                
+                // If we've moved to the duplicate last image (position = length + 1), jump to real first image
+                if (finalPosition === modalImages.length + 1) {
+                    carouselTrack.style.transition = 'none';
+                    carouselTrack.style.transform = `translateX(-${100}%)`;
+                    setTimeout(() => {
+                        carouselTrack.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    }, 50);
+                }
+                // If we've moved to the duplicate first image (position = 0), jump to real last image
+                else if (finalPosition === 0) {
+                    carouselTrack.style.transition = 'none';
+                    carouselTrack.style.transform = `translateX(-${modalImages.length * 100}%)`;
+                    setTimeout(() => {
+                        carouselTrack.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    }, 50);
+                }
+            }, 600); // Wait for transition to complete
+        }
+
+        // Select specific modal image
+        function selectModalImage(index) {
+            if (index >= 0 && index < modalImages.length) {
+                // Pause auto-play on user interaction
+                pauseCarouselAutoPlay();
+                
+                const carouselTrack = document.getElementById('modalCarouselTrack');
+                const indicators = document.querySelectorAll('.modal-carousel-indicator');
+                const thumbnails = document.querySelectorAll('.modal-thumbnail');
+                
+                currentModalImageIndex = index;
+                
+                // Calculate translateX position (add 1 for duplicate first image)
+                const translateX = -(currentModalImageIndex + 1) * 100;
+                carouselTrack.style.transform = `translateX(${translateX}%)`;
+                
+                // Update indicators
+                indicators.forEach((indicator, idx) => {
+                    indicator.classList.toggle('active', idx === currentModalImageIndex);
+                });
+                
+                // Update thumbnails
+                thumbnails.forEach((thumbnail, idx) => {
+                    thumbnail.classList.toggle('active', idx === currentModalImageIndex);
+                });
+            }
         }
 
         // Close Product Modal
@@ -3482,6 +4136,9 @@ $userInitials = $userInitials ?: 'U';
             const modal = document.getElementById('productModal');
             modal.classList.remove('active');
             document.body.style.overflow = '';
+            
+            // Stop automatic carousel
+            stopCarouselAutoPlay();
             }
 
         // Add to Cart from product detail modal -> show confirmation modal
@@ -3518,6 +4175,102 @@ $userInitials = $userInitials ?: 'U';
             showNotification(isActive ? 'Added to wishlist!' : 'Removed from wishlist!', 'success');
         }
 
+        // Toggle Wishlist from Product Card
+        function toggleWishlistFromCard(button) {
+            button.classList.toggle('active');
+            const isActive = button.classList.contains('active');
+            showNotification(isActive ? 'Added to wishlist!' : 'Removed from wishlist!', 'success');
+        }
+
+        // Share Product
+        async function shareProduct() {
+            const modal = document.getElementById('productModal');
+            if (!modal) return;
+
+            const itemName = modal.dataset.currentItemName || 'Product';
+            const itemPrice = parseFloat(modal.dataset.currentItemPrice) || 0;
+            const itemImage = modal.dataset.currentItemImage || '';
+            const currentUrl = window.location.href;
+            
+            const shareData = {
+                title: `${itemName} - Tumandok Crafts Industries`,
+                text: `Check out ${itemName} for only $${itemPrice.toFixed(2)}!`,
+                url: currentUrl
+            };
+
+            // Try Web Share API first (mobile devices)
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                    showNotification('Product shared successfully!', 'success');
+                } catch (error) {
+                    // User cancelled or error occurred
+                    if (error.name !== 'AbortError') {
+                        // Fallback to copy link
+                        copyProductLink(currentUrl, itemName);
+                    }
+                }
+            } else {
+                // Fallback: Copy link to clipboard
+                copyProductLink(currentUrl, itemName);
+            }
+        }
+
+        // Share Product from Product Card
+        async function shareProductFromCard(button) {
+            const productCard = button.closest('.product-card');
+            if (!productCard) return;
+
+            const itemName = productCard.dataset.itemName || 'Product';
+            const itemPrice = parseFloat(productCard.dataset.itemPrice) || 0;
+            const currentUrl = window.location.href;
+            
+            const shareData = {
+                title: `${itemName} - Tumandok Crafts Industries`,
+                text: `Check out ${itemName} for only $${itemPrice.toFixed(2)}!`,
+                url: currentUrl
+            };
+
+            // Try Web Share API first (mobile devices)
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                    showNotification('Product shared successfully!', 'success');
+                } catch (error) {
+                    // User cancelled or error occurred
+                    if (error.name !== 'AbortError') {
+                        // Fallback to copy link
+                        copyProductLink(currentUrl, itemName);
+                    }
+                }
+            } else {
+                // Fallback: Copy link to clipboard
+                copyProductLink(currentUrl, itemName);
+            }
+        }
+
+        // Copy Product Link to Clipboard
+        function copyProductLink(url, productName) {
+            // Create a temporary textarea to copy text
+            const textarea = document.createElement('textarea');
+            textarea.value = url;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                showNotification(`Link to "${productName}" copied to clipboard!`, 'success');
+            } catch (err) {
+                // Fallback: Show URL in a prompt
+                prompt('Copy this link:', url);
+                showNotification('Please copy the link manually', 'info');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
         // Close modal when clicking outside
         document.addEventListener('click', function(event) {
             const modal = document.getElementById('productModal');
@@ -3528,14 +4281,25 @@ $userInitials = $userInitials ?: 'U';
 
         // Close modal on ESC key
         document.addEventListener('keydown', function(event) {
+            const productModal = document.getElementById('productModal');
+            const confirmationModal = document.getElementById('confirmationModal');
+            
             if (event.key === 'Escape') {
-                const productModal = document.getElementById('productModal');
-                const confirmationModal = document.getElementById('confirmationModal');
-                
                 if (confirmationModal.classList.contains('active')) {
                     closeConfirmationModal();
                 } else if (productModal.classList.contains('active')) {
                     closeProductModal();
+                }
+            }
+            
+            // Arrow key navigation for product image gallery
+            if (productModal && productModal.classList.contains('active') && modalImages.length > 1) {
+                if (event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    changeModalImage(-1, true);
+                } else if (event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    changeModalImage(1, true);
                 }
             }
         });
@@ -4130,7 +4894,21 @@ $userInitials = $userInitials ?: 'U';
                              class="product-image"
                              onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27280%27 height=%27280%27%3E%3Crect fill=%27%23f8f9fa%27 width=%27280%27 height=%27280%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2714%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E';">
                         <div class="product-overlay">
-                            <button class="product-action-btn" onclick="event.stopPropagation(); addToCart(this);">Add to cart</button>
+                            <button class="product-action-btn" onclick="event.stopPropagation(); addToCart(this);">
+                                <i class="fas fa-shopping-cart"></i>
+                                Add to cart
+                            </button>
+                            <button class="product-overlay-icon share" 
+                                    onclick="event.stopPropagation(); shareProductFromCard(this);" 
+                                    title="Share Product">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="product-overlay-icon wishlist" 
+                                    onclick="event.stopPropagation(); toggleWishlistFromCard(this);" 
+                                    title="Add to Wishlist"
+                                    data-item-id="<?php echo htmlspecialchars($product['item_id']); ?>">
+                                <i class="fas fa-heart"></i>
+                            </button>
                         </div>
                     </div>
                     <div class="product-info">
@@ -4221,10 +4999,26 @@ $userInitials = $userInitials ?: 'U';
                 <i class="fas fa-times"></i>
             </button>
             <div class="modal-body">
+                <div class="modal-thumbnails-vertical" id="modalImageThumbnails">
+                    <!-- Thumbnails will be generated here -->
+                </div>
                 <div class="modal-image-wrapper">
-                    <img id="modalImage" class="modal-image" src="" alt="Product Image"
-                         onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27500%27 height=%27500%27%3E%3Crect fill=%27%23f8f9fa%27 width=%27500%27 height=%27500%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2714%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3ENo Image%3C/text%3E%3C/svg%3E';">
+                    <div class="modal-main-image-container">
+                        <div class="modal-image-main-container">
+                            <div class="modal-carousel-wrapper">
+                                <div class="modal-carousel-track" id="modalCarouselTrack">
+                                    <!-- Carousel items will be generated here -->
+                                </div>
+                            </div>
+                            <button class="modal-image-nav prev" onclick="changeModalImage(-1, true)" id="modalImagePrev" aria-label="Previous image">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="modal-image-nav next" onclick="changeModalImage(1, true)" id="modalImageNext" aria-label="Next image">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
+                </div>
                 <div class="modal-info">
                     <div class="modal-category" id="modalCategory"></div>
                     <h2 class="modal-title" id="modalTitle"></h2>
@@ -4239,7 +5033,10 @@ $userInitials = $userInitials ?: 'U';
                             <i class="fas fa-shopping-cart"></i>
                             <span>Add to Cart</span>
                         </button>
-                        <button class="modal-wishlist-btn" id="modalWishlistBtn" onclick="toggleWishlist()">
+                        <button class="modal-share-btn" id="modalShareBtn" onclick="shareProduct()" title="Share Product">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <button class="modal-wishlist-btn" id="modalWishlistBtn" onclick="toggleWishlist()" title="Add to Wishlist">
                             <i class="fas fa-heart"></i>
                         </button>
                     </div>
