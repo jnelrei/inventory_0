@@ -10,9 +10,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Get POST data
         $cart = json_decode($_POST['cart'] ?? '[]', true);
+<<<<<<< HEAD
         $total = floatval($_POST['total'] ?? 0);
         $payment = floatval($_POST['payment'] ?? 0);
         $change = floatval($_POST['change'] ?? 0);
+=======
+        $subtotal = floatval($_POST['subtotal'] ?? 0);
+        $vat = floatval($_POST['vat'] ?? 0);
+        $total = floatval($_POST['total'] ?? 0);
+        $payment = floatval($_POST['payment'] ?? 0);
+        $change = floatval($_POST['change'] ?? 0);
+        $discount_id = intval($_POST['discount_id'] ?? 0);
+        $discount_value = floatval($_POST['discount_value'] ?? 0);
+        $discount_amount = floatval($_POST['discount_amount'] ?? 0);
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         
         // Validation
         if (empty($cart) || !is_array($cart)) {
@@ -93,14 +104,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $items_string = implode(', ', $item_names);
         
+<<<<<<< HEAD
         $stmt = $pdo->prepare("
             INSERT INTO sales (total_amount, payment_amount, change_amount, items, created_at, created_by) 
             VALUES (?, ?, ?, ?, NOW(), ?)
+=======
+        // Check if discount columns exist in sales table
+        $stmt = $pdo->prepare("
+            INSERT INTO sales (total_amount, payment_amount, change_amount, items, created_at, created_by, discount_id, discount_amount) 
+            VALUES (?, ?, ?, ?, NOW(), ?, ?, ?)
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         ");
         
         $user_id = $_SESSION['user_id'] ?? null;
         
+<<<<<<< HEAD
         $stmt->execute([$total, $payment, $change, $items_string, $user_id]);
+=======
+        // Use NULL for discount_id if no discount applied
+        $discount_id_value = $discount_id > 0 ? $discount_id : null;
+        
+        try {
+            $stmt->execute([$total, $payment, $change, $items_string, $user_id, $discount_id_value, $discount_amount]);
+        } catch (PDOException $e) {
+            // If discount columns don't exist, try without them
+            if (strpos($e->getMessage(), 'discount') !== false) {
+                $stmt = $pdo->prepare("
+                    INSERT INTO sales (total_amount, payment_amount, change_amount, items, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, NOW(), ?)
+                ");
+                $stmt->execute([$total, $payment, $change, $items_string, $user_id]);
+            } else {
+                throw $e;
+            }
+        }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         $transaction_id = $pdo->lastInsertId();
         
         // Commit transaction

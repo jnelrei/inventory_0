@@ -7,8 +7,13 @@ header('Content-Type: application/json');
 $stock_data = [];
 
 try {
+<<<<<<< HEAD
   // Get stock levels from invtry table, ordered by low stock first
   $stmt = $pdo->query("SELECT item_id, item_name, quantity FROM invtry ORDER BY quantity ASC, item_name ASC");
+=======
+  // Get the 12 lowest stock items, ordered by quantity ascending (lowest first)
+  $stmt = $pdo->query("SELECT item_id, item_name, quantity FROM invtry ORDER BY quantity ASC, item_name ASC LIMIT 12");
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
   $stock_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   // Prepare response

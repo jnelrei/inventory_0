@@ -252,7 +252,12 @@ include("../admin_components/top_navigation.php");
   }
 
   #salesFilter,
+<<<<<<< HEAD
   #productsFilter {
+=======
+  #productsFilter,
+  #ordersFilter {
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
     border: 2px solid #e0e6ed;
     border-radius: 8px;
     background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
@@ -271,14 +276,24 @@ include("../admin_components/top_navigation.php");
   }
 
   #salesFilter:hover,
+<<<<<<< HEAD
   #productsFilter:hover {
+=======
+  #productsFilter:hover,
+  #ordersFilter:hover {
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
     border-color: #1ABB9C;
     background: linear-gradient(135deg, #ffffff 0%, #f0fdf9 100%);
     box-shadow: 0 4px 12px rgba(26, 187, 156, 0.2);
   }
 
   #salesFilter:focus,
+<<<<<<< HEAD
   #productsFilter:focus {
+=======
+  #productsFilter:focus,
+  #ordersFilter:focus {
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
     outline: none;
     border-color: #1ABB9C;
     background: #ffffff;
@@ -286,7 +301,12 @@ include("../admin_components/top_navigation.php");
   }
 
   #salesFilter option,
+<<<<<<< HEAD
   #productsFilter option {
+=======
+  #productsFilter option,
+  #ordersFilter option {
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
     padding: 12px 16px;
     font-weight: 500;
     background-color: #ffffff;
@@ -294,7 +314,12 @@ include("../admin_components/top_navigation.php");
   }
 
   #salesFilter option:checked,
+<<<<<<< HEAD
   #productsFilter option:checked {
+=======
+  #productsFilter option:checked,
+  #ordersFilter option:checked {
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
     background: linear-gradient(90deg, #1ABB9C 0%, #16a085 100%);
     color: #ffffff;
     font-weight: 700;
@@ -329,6 +354,36 @@ include("../admin_components/top_navigation.php");
     letter-spacing: 0.3px;
   }
 
+<<<<<<< HEAD
+=======
+  /* Hide filters in forecast mode */
+  .forecast-mode .filter-wrapper {
+    display: none !important;
+  }
+
+  /* Slide up transition for charts container */
+  .charts-container.sliding-up {
+    transform: translateY(-15px);
+    opacity: 0;
+  }
+
+  .charts-container.sliding-down {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+
+  /* Individual chart panel transitions */
+  .x_panel {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+  }
+
+  .mode-transitioning .x_panel {
+    transform: translateY(-10px);
+    opacity: 0.8;
+  }
+
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
   /* Add padding below the chart containers */
   .col-md-6.col-sm-6 .x_panel {
     margin-bottom: 0;
@@ -342,11 +397,120 @@ include("../admin_components/top_navigation.php");
   /* Add space between graphs and footer */
   .charts-container {
     padding-bottom: 795px;
+<<<<<<< HEAD
   }
 </style>
 
 <div class="row" style="display: inline-block; width: 100%; margin-top: 0; padding-top: 0; margin-bottom: 10px;">
   <div class="tile_count">
+=======
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+    opacity: 1;
+    will-change: transform, opacity;
+  }
+
+  /* Dashboard header container */
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    width: 100%;
+  }
+
+  .dashboard-header .dashboard-label {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2A3F54;
+    letter-spacing: 0.5px;
+    margin: 0;
+    padding-left: 10px;
+  }
+
+  .dashboard-header .dashboard-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .dashboard-header .dashboard-btn {
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .dashboard-header .dashboard-btn-primary {
+    background: linear-gradient(135deg, #1ABB9C 0%, #16a085 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(26, 187, 156, 0.3);
+  }
+
+  .dashboard-header .dashboard-btn-primary:hover {
+    background: linear-gradient(135deg, #16a085 0%, #138d75 100%);
+    box-shadow: 0 4px 12px rgba(26, 187, 156, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .dashboard-header .dashboard-btn-secondary {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    color: #2A3F54;
+    border: 2px solid #e0e6ed;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+
+  .dashboard-header .dashboard-btn-secondary:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-color: #1ABB9C;
+    color: #1ABB9C;
+    box-shadow: 0 4px 12px rgba(26, 187, 156, 0.2);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .dashboard-header .dashboard-buttons {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .dashboard-header .dashboard-btn {
+      width: 100%;
+      padding: 6px 16px;
+      font-size: 12px;
+    }
+  }
+</style>
+
+<div class="container-fluid" style="padding: 0 15px;">
+  <!-- Dashboard Header Container -->
+  <div class="row" style="display: inline-block; width: 100%; margin-top: 0; padding-top: 0; margin-bottom: 10px;">
+    <div class="dashboard-header">
+      <h2 class="dashboard-label">Dashboard</h2>
+      <div class="dashboard-buttons">
+        <button class="dashboard-btn dashboard-btn-primary">Dashboard</button>
+        <button class="dashboard-btn dashboard-btn-secondary">Forecast</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="display: inline-block; width: 100%; margin-top: 0; padding-top: 0; margin-bottom: 10px;">
+    <div class="tile_count">
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
     <div class="col-md-4 col-sm-4 tile_stats_count">
       <i class="fa fa-users icon"></i>
       <span class="count_top">Total Users</span>
@@ -364,13 +528,21 @@ include("../admin_components/top_navigation.php");
     </div>
   </div>
 </div>
+<<<<<<< HEAD
 
+=======
+</div>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
 
 <div class="charts-container">
   <div class="col-md-6 col-sm-6">
     <div class="x_panel">
       <div class="x_title">
+<<<<<<< HEAD
         <h2 class="sales-chart-title">NUMBER OF SALES</h2>
+=======
+        <h2 class="sales-chart-title" id="salesChartTitle">NUMBER OF SALES <span id="salesDateRange" style="font-size: 14px; color: #98a6ad; font-weight: 400;"></span></h2>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         <ul class="nav navbar-right panel_toolbox">
           <li>
             <div class="filter-wrapper">
@@ -395,7 +567,11 @@ include("../admin_components/top_navigation.php");
   <div class="col-md-6 col-sm-6  ">
     <div class="x_panel">
       <div class="x_title">
+<<<<<<< HEAD
         <h2 class="sales-chart-title">TOP SELLING PRODUCTS</h2>
+=======
+        <h2 class="sales-chart-title" id="productsChartTitle">TOP SELLING PRODUCTS <span id="productsDateRange" style="font-size: 14px; color: #98a6ad; font-weight: 400;"></span></h2>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         <ul class="nav navbar-right panel_toolbox">
           <li>
             <div class="filter-wrapper">
@@ -420,7 +596,11 @@ include("../admin_components/top_navigation.php");
   <div class="col-md-6 col-sm-6">
     <div class="x_panel">
       <div class="x_title">
+<<<<<<< HEAD
         <h2 class="sales-chart-title">STOCK LEVEL</h2>
+=======
+        <h2 class="sales-chart-title" id="stockChartTitle">STOCK LEVEL</h2>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         <ul class="nav navbar-right panel_toolbox">
         </ul>
         <div class="clearfix"></div>
@@ -430,6 +610,34 @@ include("../admin_components/top_navigation.php");
       </div>
     </div>
   </div>
+<<<<<<< HEAD
+=======
+  
+  <div class="col-md-6 col-sm-6">
+    <div class="x_panel">
+      <div class="x_title">
+        <h2 class="sales-chart-title" id="ordersChartTitle">ITEM ORDERS <span id="ordersDateRange" style="font-size: 14px; color: #98a6ad; font-weight: 400;"></span></h2>
+        <ul class="nav navbar-right panel_toolbox">
+          <li>
+            <div class="filter-wrapper">
+              <select id="ordersFilter" class="form-control" style="padding: 5px 10px; font-size: 13px; height: auto;">
+                <option value="daily" selected>Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+              <i class="fa fa-chevron-down dropdown-arrow" id="ordersArrow"></i>
+            </div>
+          </li>
+        </ul>
+        <div class="clearfix"></div>
+      </div>
+      <div class="x_content" style="height: 310px;">
+        <canvas id="itemOrdersChart"></canvas>
+      </div>
+    </div>
+  </div>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
 </div>
 
 
@@ -438,6 +646,168 @@ include("../admin_components/top_navigation.php");
 
 
 <script>
+<<<<<<< HEAD
+=======
+  // Global forecast mode state
+  let isForecastMode = false;
+  let isProgrammaticFilterChange = false; // Flag to prevent change handlers from interfering
+
+  // Forecast/Dashboard button handlers
+  document.addEventListener('DOMContentLoaded', function() {
+    const dashboardBtn = document.querySelector('.dashboard-btn-primary');
+    const forecastBtn = document.querySelector('.dashboard-btn-secondary');
+
+    if (dashboardBtn && forecastBtn) {
+      // Dashboard button - show actual data
+      dashboardBtn.addEventListener('click', function() {
+        if (!isForecastMode) return; // Already in dashboard mode
+        isForecastMode = false;
+        updateButtonStates();
+        animateModeSwitch();
+      });
+
+      // Forecast button - show forecast data
+      forecastBtn.addEventListener('click', function() {
+        if (isForecastMode) return; // Already in forecast mode
+        isForecastMode = true;
+        updateButtonStates();
+        animateModeSwitch();
+      });
+
+      function animateModeSwitch() {
+        const chartsContainer = document.querySelector('.charts-container');
+        if (!chartsContainer) return;
+
+        // Add sliding-up class to start animation
+        chartsContainer.classList.add('sliding-up');
+        chartsContainer.classList.add('mode-transitioning');
+
+        // After slide up, refresh charts and slide down
+        setTimeout(function() {
+          refreshAllCharts();
+          
+          // Small delay to ensure data is ready
+          setTimeout(function() {
+            // Change direction to slide down
+            chartsContainer.classList.remove('sliding-up');
+            chartsContainer.classList.add('sliding-down');
+            
+            // After animation completes, remove sliding classes
+            setTimeout(function() {
+              chartsContainer.classList.remove('sliding-down');
+              chartsContainer.classList.remove('mode-transitioning');
+            }, 50);
+          }, 50);
+        }, 300); // Half of transition duration (600ms / 2)
+      }
+
+      function updateButtonStates() {
+        if (isForecastMode) {
+          dashboardBtn.classList.remove('dashboard-btn-primary');
+          dashboardBtn.classList.add('dashboard-btn-secondary');
+          forecastBtn.classList.remove('dashboard-btn-secondary');
+          forecastBtn.classList.add('dashboard-btn-primary');
+        } else {
+          dashboardBtn.classList.remove('dashboard-btn-secondary');
+          dashboardBtn.classList.add('dashboard-btn-primary');
+          forecastBtn.classList.remove('dashboard-btn-primary');
+          forecastBtn.classList.add('dashboard-btn-secondary');
+        }
+        
+        // Toggle forecast mode class on body to hide/show filters
+        if (isForecastMode) {
+          document.body.classList.add('forecast-mode');
+        } else {
+          document.body.classList.remove('forecast-mode');
+        }
+      }
+
+      function refreshAllCharts() {
+        // In forecast mode, force all charts to use yearly filter
+        if (isForecastMode) {
+          // Set flag to prevent change handlers from interfering
+          isProgrammaticFilterChange = true;
+          
+          // Directly call fetch functions with yearly filter
+          // The functions will use 'yearly' hardcoded in the URL when isForecastMode is true
+          if (typeof fetchSalesData === 'function') {
+            fetchSalesData('yearly');
+          }
+          if (typeof fetchTopProducts === 'function') {
+            fetchTopProducts('yearly');
+          }
+          if (typeof fetchOrderItemsData === 'function') {
+            fetchOrderItemsData('yearly');
+          }
+          
+          // Refresh stock chart (no filter needed)
+          if (typeof fetchStockData === 'function') {
+            fetchStockData();
+          }
+          
+          // Set filter values to yearly after a brief delay
+          // This ensures fetch functions are called first
+          setTimeout(function() {
+            const salesFilter = document.getElementById('salesFilter');
+            const productsFilter = document.getElementById('productsFilter');
+            const ordersFilter = document.getElementById('ordersFilter');
+            
+            if (salesFilter) {
+              salesFilter.value = 'yearly';
+            }
+            if (productsFilter) {
+              productsFilter.value = 'yearly';
+            }
+            if (ordersFilter) {
+              ordersFilter.value = 'yearly';
+            }
+            
+            // Reset flag after setting values
+            setTimeout(function() {
+              isProgrammaticFilterChange = false;
+            }, 50);
+          }, 50);
+        } else {
+          // Normal mode - reset to daily and refresh
+          const salesFilter = document.getElementById('salesFilter');
+          const productsFilter = document.getElementById('productsFilter');
+          const ordersFilter = document.getElementById('ordersFilter');
+          
+          // Reset all filters to daily
+          // Set values first, then call fetch functions directly
+          // Change handlers won't interfere since isForecastMode is false
+          if (salesFilter) {
+            salesFilter.value = 'daily';
+          }
+          if (productsFilter) {
+            productsFilter.value = 'daily';
+          }
+          if (ordersFilter) {
+            ordersFilter.value = 'daily';
+          }
+          
+          // Call fetch functions directly with daily filter
+          // This bypasses any change event handlers
+          if (typeof fetchSalesData === 'function') {
+            fetchSalesData('daily');
+          }
+          if (typeof fetchTopProducts === 'function') {
+            fetchTopProducts('daily');
+          }
+          if (typeof fetchOrderItemsData === 'function') {
+            fetchOrderItemsData('daily');
+          }
+          
+          // Refresh stock chart
+          if (typeof fetchStockData === 'function') {
+            fetchStockData();
+          }
+        }
+      }
+    }
+  });
+
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
   (function() {
     function animateCount(element) {
       const target = parseInt(element.getAttribute('data-target'));
@@ -588,8 +958,95 @@ include("../admin_components/top_navigation.php");
         }, 100);
       });
     }
+<<<<<<< HEAD
   });
 
+=======
+
+    // Orders filter arrow
+    const ordersFilter = document.getElementById('ordersFilter');
+    const ordersArrow = document.getElementById('ordersArrow');
+    let ordersIsOpen = false;
+
+    if (ordersFilter && ordersArrow) {
+      ordersFilter.addEventListener('mousedown', function() {
+        ordersIsOpen = !ordersIsOpen;
+        if (ordersIsOpen) {
+          ordersArrow.classList.add('rotated');
+        } else {
+          ordersArrow.classList.remove('rotated');
+        }
+      });
+
+      ordersFilter.addEventListener('blur', function() {
+        ordersIsOpen = false;
+        ordersArrow.classList.remove('rotated');
+      });
+
+      ordersFilter.addEventListener('change', function() {
+        // Close after selection
+        setTimeout(function() {
+          ordersIsOpen = false;
+          ordersArrow.classList.remove('rotated');
+        }, 100);
+      });
+    }
+  });
+
+  // Helper function to format date range based on filter
+  function getDateRangeText(filter) {
+    const now = new Date();
+    let dateText = '';
+
+    switch (filter) {
+      case 'daily':
+        // Show today's date: "Dec 14" or day name "Monday"
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = dayNames[now.getDay()];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthName = monthNames[now.getMonth()];
+        const day = now.getDate();
+        dateText = `(${monthName} ${day})`;
+        break;
+
+      case 'weekly':
+        // Calculate week range (Sunday to Saturday)
+        const currentDay = now.getDay();
+        const daysSinceSunday = currentDay;
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - daysSinceSunday);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        
+        const startMonth = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][weekStart.getMonth()];
+        const endMonth = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][weekEnd.getMonth()];
+        dateText = `(${startMonth} ${weekStart.getDate()} to ${endMonth} ${weekEnd.getDate()})`;
+        break;
+
+      case 'monthly':
+        // Show month range: "Dec 1 to Dec 31"
+        const monthNameMonthly = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.getMonth()];
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        dateText = `(${monthNameMonthly} 1 to ${monthNameMonthly} ${lastDay})`;
+        break;
+
+      case 'yearly':
+        // Show current month and year: "December 2024"
+        const fullMonthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonth = fullMonthNames[now.getMonth()];
+        const currentYear = now.getFullYear();
+        dateText = `(${currentMonth} ${currentYear})`;
+        break;
+
+      default:
+        dateText = '';
+    }
+
+    return dateText;
+  }
+
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
   // Sales Line Chart with Dynamic Filtering
   document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('salesLineChart');
@@ -702,6 +1159,7 @@ include("../admin_components/top_navigation.php");
       }
 
       // Fetch sales data based on filter
+<<<<<<< HEAD
       function fetchSalesData(filter) {
         fetch('get_sales_data.php?filter=' + filter)
           .then(response => response.json())
@@ -715,6 +1173,51 @@ include("../admin_components/top_navigation.php");
                 if (data.date_range) {
                   dateRangeElement.textContent = '(' + data.date_range + ')';
                 } else {
+=======
+      window.fetchSalesData = function(filter) {
+        // In forecast mode, always use yearly filter (hardcoded)
+        // In dashboard mode, use the filter parameter
+        const url = isForecastMode 
+          ? 'http://localhost:3001/api/forecast?type=sales&filter=yearly'
+          : 'get_sales_data.php?filter=' + filter;
+        
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              const chartData = isForecastMode ? data.data : data.counts;
+              createChart(data.dates, chartData);
+
+              // Update date range display first
+              const dateRangeElement = document.getElementById('salesDateRange');
+              let dateRangeText = '';
+              if (dateRangeElement) {
+                // Use provided date_range if available (for weekly), otherwise calculate
+                if (data.date_range) {
+                  dateRangeText = '(' + data.date_range + ')';
+                } else {
+                  // In forecast mode use yearly, in dashboard mode use the filter
+                  const filterForDateRange = isForecastMode ? 'yearly' : filter;
+                  dateRangeText = getDateRangeText(filterForDateRange);
+                }
+                dateRangeElement.textContent = dateRangeText;
+              }
+
+              // Update chart title
+              const titleElement = document.getElementById('salesChartTitle');
+              if (titleElement) {
+                if (isForecastMode) {
+                  titleElement.innerHTML = 'NUMBER OF SALES';
+                } else {
+                  titleElement.innerHTML = 'NUMBER OF SALES <span id="salesDateRange" style="font-size: 14px; color: #98a6ad; font-weight: 400;">' + dateRangeText + '</span>';
+                }
+              }
+              
+              // Hide date range in forecast mode
+              if (isForecastMode) {
+                const dateRangeElement = document.getElementById('salesDateRange');
+                if (dateRangeElement) {
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
                   dateRangeElement.textContent = '';
                 }
               }
@@ -736,6 +1239,20 @@ include("../admin_components/top_navigation.php");
       
       if (filterSelect) {
         filterSelect.addEventListener('change', function() {
+<<<<<<< HEAD
+=======
+          // Ignore programmatic changes
+          if (isProgrammaticFilterChange) {
+            return;
+          }
+          
+          // In forecast mode, always use yearly, ignore filter changes
+          if (isForecastMode) {
+            this.value = 'yearly';
+            fetchSalesData('yearly');
+            return;
+          }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
           const selectedValue = this.value;
           fetchSalesData(selectedValue);
           
@@ -748,6 +1265,18 @@ include("../admin_components/top_navigation.php");
             productsFilterSelect.dispatchEvent(changeEvent);
             setTimeout(() => { isFilterSyncing = false; }, 100);
           }
+<<<<<<< HEAD
+=======
+          
+          // Synchronize the orders filter by triggering its change event
+          const ordersFilterSelect = document.getElementById('ordersFilter');
+          if (ordersFilterSelect && ordersFilterSelect.value !== selectedValue) {
+            ordersFilterSelect.value = selectedValue;
+            // Trigger change event to update the orders chart
+            const changeEvent = new Event('change', { bubbles: true });
+            ordersFilterSelect.dispatchEvent(changeEvent);
+          }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         });
       }
     }
@@ -837,6 +1366,7 @@ include("../admin_components/top_navigation.php");
       }
 
       // Fetch top products data based on filter
+<<<<<<< HEAD
       function fetchTopProducts(filter) {
         fetch('get_top_products.php?filter=' + filter)
           .then(response => response.json())
@@ -845,15 +1375,79 @@ include("../admin_components/top_navigation.php");
               createProductsChart(data.labels, data.data);
             } else {
               console.error('Error fetching top products:', data.message);
+=======
+      window.fetchTopProducts = function(filter) {
+        // In forecast mode, always use yearly filter (hardcoded)
+        // In dashboard mode, use the filter parameter
+        const url = isForecastMode 
+          ? 'http://localhost:3001/api/forecast?type=products&filter=yearly'
+          : 'get_top_products.php?filter=' + filter;
+        
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              const labels = isForecastMode ? data.labels : data.labels;
+              const chartData = isForecastMode ? data.data : data.data;
+              createProductsChart(labels, chartData);
+              
+              // Update chart title
+              const titleElement = document.getElementById('productsChartTitle');
+              if (titleElement) {
+                // In forecast mode use yearly, in dashboard mode use the filter
+                const filterForDateRange = isForecastMode ? 'yearly' : filter;
+                const dateRangeText = getDateRangeText(filterForDateRange);
+                if (isForecastMode) {
+                  titleElement.innerHTML = 'TOP SELLING PRODUCTS';
+                } else {
+                  titleElement.innerHTML = 'TOP SELLING PRODUCTS <span id="productsDateRange" style="font-size: 14px; color: #98a6ad; font-weight: 400;">' + dateRangeText + '</span>';
+                }
+              }
+              
+              // Update date range display (hide in forecast mode)
+              const dateRangeElement = document.getElementById('productsDateRange');
+              if (dateRangeElement) {
+                if (isForecastMode) {
+                  dateRangeElement.textContent = '';
+                } else {
+                  const dateRangeText = getDateRangeText(filter);
+                  dateRangeElement.textContent = dateRangeText;
+                }
+              }
+            } else {
+              console.error('Error fetching top products:', data.message);
+              // Clear date range on error
+              const dateRangeElement = document.getElementById('productsDateRange');
+              if (dateRangeElement) {
+                dateRangeElement.textContent = '';
+              }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
             }
           })
           .catch(error => {
             console.error('Error:', error);
+<<<<<<< HEAD
+=======
+            // Clear date range on error
+            const dateRangeElement = document.getElementById('productsDateRange');
+            if (dateRangeElement) {
+              dateRangeElement.textContent = '';
+            }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
           });
       }
 
       // Load initial data (daily by default)
       fetchTopProducts('daily');
+<<<<<<< HEAD
+=======
+      
+      // Update date range on initial load
+      const initialDateRangeElement = document.getElementById('productsDateRange');
+      if (initialDateRangeElement) {
+        initialDateRangeElement.textContent = getDateRangeText('daily');
+      }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
 
       // Handle filter change with synchronization
       const filterSelect = document.getElementById('productsFilter');
@@ -861,6 +1455,20 @@ include("../admin_components/top_navigation.php");
       
       if (filterSelect) {
         filterSelect.addEventListener('change', function() {
+<<<<<<< HEAD
+=======
+          // Ignore programmatic changes
+          if (isProgrammaticFilterChange) {
+            return;
+          }
+          
+          // In forecast mode, always use yearly, ignore filter changes
+          if (isForecastMode) {
+            this.value = 'yearly';
+            fetchTopProducts('yearly');
+            return;
+          }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
           const selectedValue = this.value;
           fetchTopProducts(selectedValue);
           
@@ -873,6 +1481,18 @@ include("../admin_components/top_navigation.php");
             salesFilterSelect.dispatchEvent(changeEvent);
             setTimeout(() => { isFilterSyncing = false; }, 100);
           }
+<<<<<<< HEAD
+=======
+          
+          // Synchronize the orders filter by triggering its change event
+          const ordersFilterSelect = document.getElementById('ordersFilter');
+          if (ordersFilterSelect && ordersFilterSelect.value !== selectedValue) {
+            ordersFilterSelect.value = selectedValue;
+            // Trigger change event to update the orders chart
+            const changeEvent = new Event('change', { bubbles: true });
+            ordersFilterSelect.dispatchEvent(changeEvent);
+          }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         });
       }
     }
@@ -989,12 +1609,33 @@ include("../admin_components/top_navigation.php");
       }
 
       // Fetch stock data via AJAX
+<<<<<<< HEAD
       function fetchStockData() {
         fetch('get_stock_data.php')
           .then(response => response.json())
           .then(data => {
             if (data.success) {
               createStockChart(data.labels, data.data);
+=======
+      window.fetchStockData = function() {
+        const url = isForecastMode 
+          ? 'http://localhost:3001/api/forecast?type=stock'
+          : 'get_stock_data.php';
+        
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              const labels = isForecastMode ? data.labels : data.labels;
+              const chartData = isForecastMode ? data.data : data.data;
+              createStockChart(labels, chartData);
+              
+              // Update chart title
+              const stockTitleElement = document.getElementById('stockChartTitle');
+              if (stockTitleElement) {
+                stockTitleElement.innerHTML = 'STOCK LEVEL';
+              }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
             } else {
               console.error('Error fetching stock data:', data.message);
               // Create empty chart on error
@@ -1009,7 +1650,241 @@ include("../admin_components/top_navigation.php");
       }
 
       // Load initial data
+<<<<<<< HEAD
       fetchStockData();
+=======
+      window.fetchStockData();
+    }
+  });
+
+  // Item Orders Line Chart
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('itemOrdersChart');
+    let ordersChart = null;
+
+    if (ctx) {
+      // Initialize chart
+      function createOrdersChart(labels, data) {
+        // Destroy existing chart if it exists
+        if (ordersChart) {
+          ordersChart.destroy();
+        }
+
+        ordersChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Item Orders Quantity',
+              data: data,
+              borderColor: 'rgba(52, 152, 219, 1)',
+              backgroundColor: 'rgba(52, 152, 219, 0.1)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 5,
+              pointBackgroundColor: 'rgba(52, 152, 219, 1)',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointHoverRadius: 7,
+              pointHoverBackgroundColor: 'rgba(52, 152, 219, 1)',
+              pointHoverBorderColor: '#fff',
+              pointHoverBorderWidth: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 2,
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                mode: 'index',
+                intersect: false,
+                backgroundColor: 'rgba(42, 63, 84, 0.95)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                borderColor: 'rgba(52, 152, 219, 0.5)',
+                borderWidth: 1,
+                padding: 12,
+                displayColors: true,
+                callbacks: {
+                  label: function(context) {
+                    let label = context.dataset.label || '';
+                    if (label) {
+                      label += ': ';
+                    }
+                    if (context.parsed.y !== null) {
+                      label += context.parsed.y + ' unit' + (context.parsed.y !== 1 ? 's' : '');
+                    }
+                    return label;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                min: 0,
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.05)',
+                  drawBorder: false
+                },
+                ticks: {
+                  stepSize: 1,
+                  font: {
+                    size: 11
+                  }
+                }
+              },
+              x: {
+                grid: {
+                  display: false,
+                  drawBorder: false
+                },
+                ticks: {
+                  maxRotation: 45,
+                  minRotation: 45,
+                  font: {
+                    size: 12,
+                    weight: 'bold'
+                  },
+                  color: '#2A3F54'
+                }
+              }
+            },
+            interaction: {
+              mode: 'nearest',
+              axis: 'x',
+              intersect: false
+            },
+            hover: {
+              mode: 'index',
+              intersect: false
+            }
+          }
+        });
+      }
+
+      // Fetch order items data based on filter
+      window.fetchOrderItemsData = function(filter) {
+        // In forecast mode, always use yearly filter (hardcoded)
+        // In dashboard mode, use the filter parameter
+        const url = isForecastMode 
+          ? 'http://localhost:3001/api/forecast?type=orders&filter=yearly'
+          : 'get_order_items_data.php?filter=' + filter;
+        
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              const labels = isForecastMode ? data.dates : data.labels;
+              const chartData = isForecastMode ? data.data : data.data;
+              createOrdersChart(labels, chartData);
+              
+              // Update date range display first
+              const dateRangeElement = document.getElementById('ordersDateRange');
+              let dateRangeText = '';
+              if (dateRangeElement) {
+                // Use provided date_range if available (for weekly), otherwise calculate
+                if (data.date_range) {
+                  dateRangeText = '(' + data.date_range + ')';
+                } else {
+                  // In forecast mode use yearly, in dashboard mode use the filter
+                  const filterForDateRange = isForecastMode ? 'yearly' : filter;
+                  dateRangeText = getDateRangeText(filterForDateRange);
+                }
+                dateRangeElement.textContent = dateRangeText;
+              }
+              
+              // Update chart title
+              const ordersTitleElement = document.getElementById('ordersChartTitle');
+              if (ordersTitleElement) {
+                if (isForecastMode) {
+                  ordersTitleElement.innerHTML = 'ITEM ORDERS';
+                } else {
+                  ordersTitleElement.innerHTML = 'ITEM ORDERS <span id="ordersDateRange" style="font-size: 14px; color: #98a6ad; font-weight: 400;">' + dateRangeText + '</span>';
+                }
+              }
+              
+              // Hide date range in forecast mode
+              if (isForecastMode) {
+                const dateRangeElement = document.getElementById('ordersDateRange');
+                if (dateRangeElement) {
+                  dateRangeElement.textContent = '';
+                }
+              }
+            } else {
+              console.error('Error fetching order items data:', data.message);
+              // Create empty chart on error
+              createOrdersChart([], []);
+              // Clear date range on error
+              const dateRangeElement = document.getElementById('ordersDateRange');
+              if (dateRangeElement) {
+                dateRangeElement.textContent = '';
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            // Create empty chart on error
+            createOrdersChart([], []);
+            // Clear date range on error
+            const dateRangeElement = document.getElementById('ordersDateRange');
+            if (dateRangeElement) {
+              dateRangeElement.textContent = '';
+            }
+          });
+      }
+
+      // Load initial data (daily by default)
+      fetchOrderItemsData('daily');
+
+      // Handle filter change with synchronization
+      const filterSelect = document.getElementById('ordersFilter');
+      const salesFilterSelect = document.getElementById('salesFilter');
+      const productsFilterSelect = document.getElementById('productsFilter');
+      
+      if (filterSelect) {
+        filterSelect.addEventListener('change', function() {
+          // Ignore programmatic changes
+          if (isProgrammaticFilterChange) {
+            return;
+          }
+          
+          // In forecast mode, always use yearly, ignore filter changes
+          if (isForecastMode) {
+            this.value = 'yearly';
+            fetchOrderItemsData('yearly');
+            return;
+          }
+          const selectedValue = this.value;
+          fetchOrderItemsData(selectedValue);
+          
+          // Synchronize the sales filter by triggering its change event
+          if (!isFilterSyncing && salesFilterSelect && salesFilterSelect.value !== selectedValue) {
+            isFilterSyncing = true;
+            salesFilterSelect.value = selectedValue;
+            // Trigger change event to update the sales chart
+            const changeEvent = new Event('change', { bubbles: true });
+            salesFilterSelect.dispatchEvent(changeEvent);
+            setTimeout(() => { isFilterSyncing = false; }, 100);
+          }
+          
+          // Synchronize the products filter by triggering its change event
+          if (!isFilterSyncing && productsFilterSelect && productsFilterSelect.value !== selectedValue) {
+            isFilterSyncing = true;
+            productsFilterSelect.value = selectedValue;
+            // Trigger change event to update the products chart
+            const changeEvent = new Event('change', { bubbles: true });
+            productsFilterSelect.dispatchEvent(changeEvent);
+            setTimeout(() => { isFilterSyncing = false; }, 100);
+          }
+        });
+      }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
     }
   });
 </script>

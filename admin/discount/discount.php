@@ -37,11 +37,40 @@ include("../admin_components/top_navigation.php");
       <div class="row">
         <div class="col-sm-12">
       <div class="card-box table-responsive">
+<<<<<<< HEAD
             <?php if (isset($error_message)): ?>
               <div class="alert alert-danger">
                 <?php echo htmlspecialchars($error_message); ?>
               </div>
             <?php endif; ?>
+=======
+            <?php 
+            // Store session messages in variables for SweetAlert display
+            $show_success_alert = false;
+            $success_message = '';
+            $show_error_alert = false;
+            $error_message_session = '';
+            
+            // Check for database loading errors
+            if (isset($error_message)) {
+                $show_error_alert = true;
+                $error_message_session = $error_message;
+            }
+            
+            // Check for session messages (from add/update/delete operations)
+            if (isset($_SESSION['discount_message'])) {
+                if (isset($_SESSION['discount_success']) && $_SESSION['discount_success']) {
+                    $show_success_alert = true;
+                    $success_message = $_SESSION['discount_message'];
+                } else {
+                    $show_error_alert = true;
+                    $error_message_session = $_SESSION['discount_message'];
+                }
+                unset($_SESSION['discount_message']);
+                unset($_SESSION['discount_success']);
+            }
+            ?>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
 
             <table id="datatable" class="table table-striped table-bordered" style="width:100%; visibility: hidden;">
           <thead>
@@ -117,6 +146,35 @@ $(document).ready(function() {
   }
 
   setTimeout(initDiscountTable, 150);
+<<<<<<< HEAD
+=======
+  
+  // Show SweetAlert for success messages
+  <?php if ($show_success_alert): ?>
+  Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: '<?php echo addslashes($success_message); ?>',
+      timer: 3000,
+      timerProgressBar: true,
+      showConfirmButton: true,
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#26B99A'
+  });
+  <?php endif; ?>
+  
+  // Show SweetAlert for error messages
+  <?php if ($show_error_alert): ?>
+  Swal.fire({
+      icon: 'error',
+      title: 'Error!',
+      html: '<?php echo addslashes($error_message_session); ?>',
+      showConfirmButton: true,
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#d33'
+  });
+  <?php endif; ?>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
 });
 
 // Open Add modal
@@ -169,6 +227,7 @@ function deleteDiscount(button) {
 
     if (!discount.disc_id) return;
 
+<<<<<<< HEAD
     if (confirm('Are you sure you want to delete this discount?')) {
         const form = document.getElementById('deleteDiscountForm');
         if (form) {
@@ -176,6 +235,61 @@ function deleteDiscount(button) {
             form.submit();
         }
     }
+=======
+    const discountValue = discount.discount_value || 'N/A';
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        html: 'Do you want to delete discount <span style="color: red; font-weight: bold;">' + discountValue + '%</span>?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Delete via AJAX
+            $.ajax({
+                url: 'delete_discount.php',
+                type: 'POST',
+                data: { disc_id: discount.disc_id },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: response.message || 'Discount has been deleted.',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            showConfirmButton: true,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#26B99A'
+                        }).then((result) => {
+                            if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+                                window.location.reload();
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message || 'Failed to delete discount'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred: ' + error
+                    });
+                }
+            });
+        }
+    });
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
 }
 </script>
 

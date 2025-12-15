@@ -27,6 +27,7 @@ try {
       <div class="modal-body" style="padding: 30px 30px 15px 30px; max-height: 70vh; overflow-y: auto; overflow-x: hidden;">
         <form id="addItemForm" method="post" action="add_item.php" enctype="multipart/form-data">
           <div class="row">
+<<<<<<< HEAD
             <!-- Left Column: Picture -->
             <div class="col-md-5">
               <div class="form-group">
@@ -36,6 +37,22 @@ try {
                 </div>
                 <div class="clean-file-upload-wrapper">
                   <input type="file" class="clean-file-input" id="add_picture" name="picture" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" onchange="handleAddImagePreview(this)">
+=======
+            <!-- Left Column: Pictures -->
+            <div class="col-md-5">
+              <div class="form-group">
+                <label for="add_picture" style="color: #000000; font-weight: 600; font-size: 14px; margin-bottom: 10px; display: block;">Pictures <span class="text-muted" style="font-size: 12px; font-weight: normal;">(Multiple images allowed)</span></label>
+                <div id="addImagePreview" style="margin-bottom: 15px; background: #f8f9fa; border-radius: 8px; padding: 15px; min-height: 300px;">
+                  <div id="addPreviewContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;">
+                    <!-- Preview images will be added here -->
+                  </div>
+                  <div id="addPreviewPlaceholder" style="text-align: center; padding: 100px 20px; color: #999;">
+                    <p style="margin: 0;">No images selected</p>
+                  </div>
+                </div>
+                <div class="clean-file-upload-wrapper">
+                  <input type="file" class="clean-file-input" id="add_picture" name="picture[]" multiple accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" onchange="handleAddImagePreview(this)">
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
                   <label for="add_picture" class="clean-file-label">
                     <div class="file-icon-wrapper">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -47,7 +64,11 @@ try {
                       </svg>
                     </div>
                     <div class="file-label-content">
+<<<<<<< HEAD
                       <span class="file-main-text">Choose Image File</span>
+=======
+                      <span class="file-main-text">Choose Image Files</span>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
                       <span class="file-selected-name" id="add_file_name"></span>
                     </div>
                     <div class="file-choose-btn">
@@ -60,7 +81,11 @@ try {
                     </div>
                   </label>
                   <div class="file-info-text">
+<<<<<<< HEAD
                     <span>Maximum file size: 5MB</span>
+=======
+                    <span>Maximum file size: 5MB per image</span>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
                     <span class="info-dot">•</span>
                     <span>Accepted formats: JPEG, PNG, GIF, WebP</span>
                   </div>
@@ -77,7 +102,11 @@ try {
 
               <div class="form-group" style="margin-bottom: 20px;">
                 <label for="add_category_id" style="color: #000000; font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Category <span class="text-danger">*</span></label>
+<<<<<<< HEAD
                 <select class="form-control" id="add_category_id" name="category_id" required style="border: 1px solid #dee2e6; border-radius: 4px; padding: 10px 12px; font-size: 14px; transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;">
+=======
+                <select class="form-control" id="add_category_id" name="category_id" required style="border: 1px solid #dee2e6; border-radius: 4px; font-size: 14px; transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;">
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
                   <option value="">Select Category</option>
                   <?php foreach ($categories as $category): ?>
                     <option value="<?php echo htmlspecialchars($category['category_id']); ?>">
@@ -150,6 +179,7 @@ try {
         <form id="editItemForm" method="post" action="update_item.php" enctype="multipart/form-data">
           <input type="hidden" id="edit_item_id" name="item_id" value="">
           <div class="row">
+<<<<<<< HEAD
             <!-- Left Column: Picture -->
             <div class="col-md-5">
               <div class="form-group">
@@ -159,6 +189,22 @@ try {
                 </div>
                 <div class="clean-file-upload-wrapper">
                   <input type="file" class="clean-file-input" id="edit_picture" name="picture" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" onchange="handleEditImagePreview(this)">
+=======
+            <!-- Left Column: Pictures -->
+            <div class="col-md-5">
+              <div class="form-group">
+                <label for="edit_picture" style="color: #000000; font-weight: 600; font-size: 14px; margin-bottom: 10px; display: block;">Pictures <span class="text-muted" style="font-size: 12px; font-weight: normal;">(Multiple images allowed)</span></label>
+                <div id="editImagePreview" style="margin-bottom: 15px; background: #f8f9fa; border-radius: 8px; padding: 15px; min-height: 300px;">
+                  <div id="editPreviewContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;">
+                    <!-- Preview images will be added here -->
+                  </div>
+                  <div id="editPreviewPlaceholder" style="text-align: center; padding: 100px 20px; color: #999;">
+                    <p style="margin: 0;">No images selected</p>
+                  </div>
+                </div>
+                <div class="clean-file-upload-wrapper">
+                  <input type="file" class="clean-file-input" id="edit_picture" name="picture[]" multiple accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" onchange="handleEditImagePreview(this)">
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
                   <label for="edit_picture" class="clean-file-label">
                     <div class="file-icon-wrapper">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -170,7 +216,11 @@ try {
                       </svg>
                     </div>
                     <div class="file-label-content">
+<<<<<<< HEAD
                       <span class="file-main-text">Choose Image File</span>
+=======
+                      <span class="file-main-text">Choose Image Files</span>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
                       <span class="file-selected-name" id="edit_file_name"></span>
                     </div>
                     <div class="file-choose-btn">
@@ -183,12 +233,20 @@ try {
                     </div>
                   </label>
                   <div class="file-info-text">
+<<<<<<< HEAD
                     <span>Maximum file size: 5MB</span>
+=======
+                    <span>Maximum file size: 5MB per image</span>
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
                     <span class="info-dot">•</span>
                     <span>Accepted formats: JPEG, PNG, GIF, WebP</span>
                   </div>
                 </div>
+<<<<<<< HEAD
                 <input type="hidden" id="edit_existing_picture" name="existing_picture" value="">
+=======
+                <input type="hidden" id="edit_existing_images" name="existing_images" value="">
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
               </div>
             </div>
 
@@ -496,6 +554,69 @@ try {
   #editItemModal .modal-body::-webkit-scrollbar-thumb:hover {
     background: #1e9d82;
   }
+<<<<<<< HEAD
+=======
+  
+  /* Image Preview Grid Styles */
+  #addPreviewContainer,
+  #editPreviewContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  #addPreviewContainer > div,
+  #editPreviewContainer > div {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #ffffff;
+  }
+  
+  #addPreviewContainer img,
+  #editPreviewContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  #addPreviewContainer button,
+  #editPreviewContainer button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+  
+  #addPreviewContainer button:hover,
+  #editPreviewContainer button:hover {
+    background: #c82333;
+    transform: scale(1.1);
+  }
+  
+  #addPreviewPlaceholder,
+  #editPreviewPlaceholder {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+  }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
 </style>
 
 <!-- JsBarcode Library for Barcode Generation -->
@@ -577,11 +698,19 @@ try {
   function addItem() {
     // Reset form when modal opens
     $('#addItemForm')[0].reset();
+<<<<<<< HEAD
     $('#addPreviewImg').attr('src', 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27300%27%3E%3Crect fill=%27%23f0f0f0%27 width=%27300%27 height=%27300%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2716%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3EImage Preview%3C/text%3E%3C/svg%3E');
     $('#addPreviewImg').css({
       'border': '2px dashed #ddd',
       'box-shadow': 'none'
     });
+=======
+    // Reset image preview
+    const previewContainer = document.getElementById('addPreviewContainer');
+    const previewPlaceholder = document.getElementById('addPreviewPlaceholder');
+    if (previewContainer) previewContainer.innerHTML = '';
+    if (previewPlaceholder) previewPlaceholder.style.display = 'block';
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
     // Reset file name display
     const fileNameEl = document.getElementById('add_file_name');
     if (fileNameEl) {
@@ -611,6 +740,7 @@ try {
           $('#edit_description').val(item.description || '');
           $('#edit_quantity').val(item.quantity);
           $('#edit_total_cost').val(item.total_cost);
+<<<<<<< HEAD
           $('#edit_existing_picture').val(item.picture || '');
           $('#edit_barcode').val(item.barcode || '');
           
@@ -627,6 +757,73 @@ try {
               'border': '2px dashed #ddd',
               'box-shadow': 'none'
             });
+=======
+          $('#edit_barcode').val(item.barcode || '');
+          
+          // Set existing images
+          const existingImages = item.images || [];
+          $('#edit_existing_images').val(JSON.stringify(existingImages));
+          
+          // Display existing images
+          const previewContainer = document.getElementById('editPreviewContainer');
+          const previewPlaceholder = document.getElementById('editPreviewPlaceholder');
+          if (previewContainer) {
+            previewContainer.innerHTML = '';
+            if (existingImages && existingImages.length > 0) {
+              previewPlaceholder.style.display = 'none';
+              previewContainer.style.display = 'grid';
+              existingImages.forEach((imgData) => {
+                const previewDiv = document.createElement('div');
+                previewDiv.style.position = 'relative';
+                previewDiv.style.aspectRatio = '1';
+                previewDiv.style.overflow = 'hidden';
+                previewDiv.style.borderRadius = '6px';
+                previewDiv.style.border = '2px solid #28a745';
+                previewDiv.style.background = '#ffffff';
+                
+                const img = document.createElement('img');
+                img.src = imgData.image;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.display = 'block';
+                
+                // Remove button - use image path as identifier
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.innerHTML = '×';
+                removeBtn.style.position = 'absolute';
+                removeBtn.style.top = '5px';
+                removeBtn.style.right = '5px';
+                removeBtn.style.background = '#dc3545';
+                removeBtn.style.color = '#fff';
+                removeBtn.style.border = 'none';
+                removeBtn.style.borderRadius = '50%';
+                removeBtn.style.width = '24px';
+                removeBtn.style.height = '24px';
+                removeBtn.style.cursor = 'pointer';
+                removeBtn.style.fontSize = '18px';
+                removeBtn.style.lineHeight = '1';
+                removeBtn.style.display = 'flex';
+                removeBtn.style.alignItems = 'center';
+                removeBtn.style.justifyContent = 'center';
+                removeBtn.onclick = function() {
+                  // Remove image by matching image path
+                  const imagePath = imgData.image;
+                  const updatedImages = existingImages.filter(img => img.image !== imagePath);
+                  $('#edit_existing_images').val(JSON.stringify(updatedImages));
+                  handleEditImagePreview(document.getElementById('edit_picture'));
+                };
+                
+                previewDiv.appendChild(img);
+                previewDiv.appendChild(removeBtn);
+                previewContainer.appendChild(previewDiv);
+              });
+            } else {
+              previewPlaceholder.style.display = 'block';
+              previewContainer.style.display = 'none';
+            }
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
           }
           
           // Reset file name display when editing (since we're editing existing item, no new file selected yet)
@@ -666,6 +863,7 @@ try {
     });
   }
 
+<<<<<<< HEAD
   // Image preview functionality for add modal - shows immediately when file is selected
   function handleAddImagePreview(input) {
     const file = input.files && input.files[0];
@@ -683,6 +881,25 @@ try {
           fileName = fileName.substring(0, 27) + '...';
         }
         fileNameDisplay.textContent = fileName;
+=======
+  // Image preview functionality for add modal - shows immediately when files are selected
+  function handleAddImagePreview(input) {
+    const files = input.files;
+    const previewContainer = document.getElementById('addPreviewContainer');
+    const previewPlaceholder = document.getElementById('addPreviewPlaceholder');
+    const fileNameDisplay = document.getElementById('add_file_name');
+    
+    if (!previewContainer) return;
+    
+    // Clear existing previews
+    previewContainer.innerHTML = '';
+    
+    // Update file name display
+    if (fileNameDisplay) {
+      if (files && files.length > 0) {
+        const fileCount = files.length;
+        fileNameDisplay.textContent = fileCount + ' file' + (fileCount > 1 ? 's' : '') + ' selected';
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         fileNameDisplay.classList.add('has-file');
       } else {
         fileNameDisplay.textContent = '';
@@ -690,6 +907,7 @@ try {
       }
     }
     
+<<<<<<< HEAD
     if (file) {
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -755,6 +973,108 @@ try {
       previewImg.src = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27300%27%3E%3Crect fill=%27%23f0f0f0%27 width=%27300%27 height=%27300%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2716%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3EImage Preview%3C/text%3E%3C/svg%3E';
       previewImg.style.border = '2px dashed #ddd';
       previewImg.style.boxShadow = 'none';
+=======
+    if (files && files.length > 0) {
+      previewPlaceholder.style.display = 'none';
+      previewContainer.style.display = 'grid';
+      
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      let validFiles = [];
+      
+      // Process each file
+      Array.from(files).forEach((file, fileIndex) => {
+        // Validate file type
+        if (!allowedTypes.includes(file.type)) {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Invalid File Type',
+              text: file.name + ' is not a valid image file (JPEG, PNG, GIF, or WebP)'
+            });
+          }
+          return;
+        }
+        
+        // Validate file size
+        if (file.size > maxSize) {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'error',
+              title: 'File Too Large',
+              text: file.name + ' exceeds 5MB limit. Please choose a smaller image.'
+            });
+          }
+          return;
+        }
+        
+        validFiles.push(file);
+        
+        // Create preview element
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewDiv = document.createElement('div');
+          previewDiv.style.position = 'relative';
+          previewDiv.style.aspectRatio = '1';
+          previewDiv.style.overflow = 'hidden';
+          previewDiv.style.borderRadius = '6px';
+          previewDiv.style.border = '2px solid #28a745';
+          previewDiv.style.background = '#ffffff';
+          
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          img.style.display = 'block';
+          
+          // Remove button - store file index in closure
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.innerHTML = '×';
+          removeBtn.style.position = 'absolute';
+          removeBtn.style.top = '5px';
+          removeBtn.style.right = '5px';
+          removeBtn.style.background = '#dc3545';
+          removeBtn.style.color = '#fff';
+          removeBtn.style.border = 'none';
+          removeBtn.style.borderRadius = '50%';
+          removeBtn.style.width = '24px';
+          removeBtn.style.height = '24px';
+          removeBtn.style.cursor = 'pointer';
+          removeBtn.style.fontSize = '18px';
+          removeBtn.style.lineHeight = '1';
+          removeBtn.style.display = 'flex';
+          removeBtn.style.alignItems = 'center';
+          removeBtn.style.justifyContent = 'center';
+          (function(currentIndex) {
+            removeBtn.onclick = function() {
+              // Remove file from input using stored index
+              const dt = new DataTransfer();
+              Array.from(input.files).forEach((f, i) => {
+                if (i !== currentIndex) dt.items.add(f);
+              });
+              input.files = dt.files;
+              handleAddImagePreview(input);
+            };
+          })(fileIndex);
+          
+          previewDiv.appendChild(img);
+          previewDiv.appendChild(removeBtn);
+          previewContainer.appendChild(previewDiv);
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      if (validFiles.length === 0) {
+        previewPlaceholder.style.display = 'block';
+        previewContainer.style.display = 'none';
+        input.value = '';
+      }
+    } else {
+      previewPlaceholder.style.display = 'block';
+      previewContainer.style.display = 'none';
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
     }
   }
   
@@ -776,6 +1096,7 @@ try {
     });
   });
 
+<<<<<<< HEAD
   // Image preview functionality for edit modal - shows immediately when file is selected
   function handleEditImagePreview(input) {
     const file = input.files && input.files[0];
@@ -794,6 +1115,87 @@ try {
           fileName = fileName.substring(0, 27) + '...';
         }
         fileNameDisplay.textContent = fileName;
+=======
+  // Image preview functionality for edit modal - shows immediately when files are selected
+  function handleEditImagePreview(input) {
+    const files = input.files;
+    const previewContainer = document.getElementById('editPreviewContainer');
+    const previewPlaceholder = document.getElementById('editPreviewPlaceholder');
+    const existingImagesInput = document.getElementById('edit_existing_images');
+    const fileNameDisplay = document.getElementById('edit_file_name');
+    
+    if (!previewContainer) return;
+    
+    // Get existing images
+    let existingImages = [];
+    if (existingImagesInput && existingImagesInput.value) {
+      try {
+        existingImages = JSON.parse(existingImagesInput.value);
+      } catch(e) {
+        existingImages = [];
+      }
+    }
+    
+    // Clear existing previews
+    previewContainer.innerHTML = '';
+    
+    // Display existing images first
+    if (existingImages && existingImages.length > 0) {
+      existingImages.forEach((imgData) => {
+        const previewDiv = document.createElement('div');
+        previewDiv.style.position = 'relative';
+        previewDiv.style.aspectRatio = '1';
+        previewDiv.style.overflow = 'hidden';
+        previewDiv.style.borderRadius = '6px';
+        previewDiv.style.border = '2px solid #28a745';
+        previewDiv.style.background = '#ffffff';
+        
+        const img = document.createElement('img');
+        img.src = imgData.image;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.display = 'block';
+        
+        // Remove button for existing images - use image path as identifier
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.innerHTML = '×';
+        removeBtn.style.position = 'absolute';
+        removeBtn.style.top = '5px';
+        removeBtn.style.right = '5px';
+        removeBtn.style.background = '#dc3545';
+        removeBtn.style.color = '#fff';
+        removeBtn.style.border = 'none';
+        removeBtn.style.borderRadius = '50%';
+        removeBtn.style.width = '24px';
+        removeBtn.style.height = '24px';
+        removeBtn.style.cursor = 'pointer';
+        removeBtn.style.fontSize = '18px';
+        removeBtn.style.lineHeight = '1';
+        removeBtn.style.display = 'flex';
+        removeBtn.style.alignItems = 'center';
+        removeBtn.style.justifyContent = 'center';
+        removeBtn.onclick = function() {
+          // Remove image by matching image path
+          const imagePath = imgData.image;
+          const updatedImages = existingImages.filter(img => img.image !== imagePath);
+          existingImagesInput.value = JSON.stringify(updatedImages);
+          handleEditImagePreview(input);
+        };
+        
+        previewDiv.appendChild(img);
+        previewDiv.appendChild(removeBtn);
+        previewContainer.appendChild(previewDiv);
+      });
+    }
+    
+    // Update file name display
+    if (fileNameDisplay) {
+      if (files && files.length > 0) {
+        const fileCount = files.length;
+        fileNameDisplay.textContent = fileCount + ' new file' + (fileCount > 1 ? 's' : '') + ' selected';
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
         fileNameDisplay.classList.add('has-file');
       } else {
         fileNameDisplay.textContent = '';
@@ -801,6 +1203,7 @@ try {
       }
     }
     
+<<<<<<< HEAD
     if (file) {
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -883,6 +1286,112 @@ try {
         previewImg.src = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27300%27%3E%3Crect fill=%27%23f0f0f0%27 width=%27300%27 height=%27300%27/%3E%3Ctext fill=%27%23999%27 font-family=%27sans-serif%27 font-size=%2716%27 dy=%2710.5%27 font-weight=%27bold%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3EImage Preview%3C/text%3E%3C/svg%3E';
         previewImg.style.border = '2px dashed #ddd';
         previewImg.style.boxShadow = 'none';
+=======
+    if (files && files.length > 0) {
+      previewPlaceholder.style.display = 'none';
+      previewContainer.style.display = 'grid';
+      
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      let validFiles = [];
+      let fileIndex = existingImages.length;
+      
+      // Process each new file
+      Array.from(files).forEach((file, fileIndex) => {
+        // Validate file type
+        if (!allowedTypes.includes(file.type)) {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Invalid File Type',
+              text: file.name + ' is not a valid image file (JPEG, PNG, GIF, or WebP)'
+            });
+          }
+          return;
+        }
+        
+        // Validate file size
+        if (file.size > maxSize) {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'error',
+              title: 'File Too Large',
+              text: file.name + ' exceeds 5MB limit. Please choose a smaller image.'
+            });
+          }
+          return;
+        }
+        
+        validFiles.push(file);
+        
+        // Create preview element
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewDiv = document.createElement('div');
+          previewDiv.style.position = 'relative';
+          previewDiv.style.aspectRatio = '1';
+          previewDiv.style.overflow = 'hidden';
+          previewDiv.style.borderRadius = '6px';
+          previewDiv.style.border = '2px solid #17a2b8';
+          previewDiv.style.background = '#ffffff';
+          
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          img.style.display = 'block';
+          
+          // Remove button for new files - store file index in closure
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.innerHTML = '×';
+          removeBtn.style.position = 'absolute';
+          removeBtn.style.top = '5px';
+          removeBtn.style.right = '5px';
+          removeBtn.style.background = '#dc3545';
+          removeBtn.style.color = '#fff';
+          removeBtn.style.border = 'none';
+          removeBtn.style.borderRadius = '50%';
+          removeBtn.style.width = '24px';
+          removeBtn.style.height = '24px';
+          removeBtn.style.cursor = 'pointer';
+          removeBtn.style.fontSize = '18px';
+          removeBtn.style.lineHeight = '1';
+          removeBtn.style.display = 'flex';
+          removeBtn.style.alignItems = 'center';
+          removeBtn.style.justifyContent = 'center';
+          (function(currentIndex) {
+            removeBtn.onclick = function() {
+              // Remove file from input using stored index
+              const dt = new DataTransfer();
+              Array.from(input.files).forEach((f, i) => {
+                if (i !== currentIndex) dt.items.add(f);
+              });
+              input.files = dt.files;
+              handleEditImagePreview(input);
+            };
+          })(fileIndex);
+          
+          previewDiv.appendChild(img);
+          previewDiv.appendChild(removeBtn);
+          previewContainer.appendChild(previewDiv);
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      if (validFiles.length === 0 && existingImages.length === 0) {
+        previewPlaceholder.style.display = 'block';
+        previewContainer.style.display = 'none';
+        if (files.length === 0) {
+          input.value = '';
+        }
+      }
+    } else {
+      if (existingImages.length === 0) {
+        previewPlaceholder.style.display = 'block';
+        previewContainer.style.display = 'none';
+>>>>>>> bffd17eb2ccfbbfa430d2dfe62f4af6da5ab7e21
       }
     }
   }
